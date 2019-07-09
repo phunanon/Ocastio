@@ -1,0 +1,85 @@
+html {
+}
+
+body {
+	margin: 1rem auto;
+	width: 48rem;
+}
+
+navinfo {
+	display: inline-block;
+	margin: 0 1rem;
+	padding: .5rem;
+	background-color: #dfd;
+}
+
+warning {
+	display: block;
+	padding: 1rem;
+	background-color: #faa;
+}
+
+img.small {
+	float: left;
+	margin-right: .5rem;
+	width: 4rem;
+	height: 2.4rem;
+	object-fit: contain;
+}
+
+
+/*move into home.css*/
+#stats stat {
+	display: inline-block;
+	margin: .5rem;
+	padding: .5rem;
+	background-color: #eeee;
+	border-bottom: .2rem solid black;
+}
+
+/*move into vote.css*/
+balopt {
+	display: block;
+	margin-bottom: .25rem;
+}
+balopt span {
+	vertical-align: top;
+	line-height: 2.25rem;
+}
+[type="checkbox"], [type="radio"] {
+	display: none;
+}
+[type="radio"] + label, [type="checkbox"] + label {
+	cursor: pointer;
+	display: inline-block;
+	background-color: #fff;
+	color: #fff;
+	text-align: center;
+	line-height: 1.6rem;
+	border-radius: 50%;
+	border: .15rem solid #000;
+	width: 1.5rem;
+	height: 1.5rem;
+	margin-right: .25rem;
+}
+[type="checkbox"] + label {
+	border-radius: unset;
+}
+[type="radio"]:checked + label, [type="checkbox"]:checked + label {
+	background-color: #000;
+}
+
+/*move into vote.css*/
+tr.won {
+	background-color: #afa;
+}
+
+@media only screen and (max-width: 48rem) {
+	navbar h1 {
+		display: none !important;
+	}
+	body {
+		margin: .5rem;
+		width: calc(100% - 1rem);
+	}
+}

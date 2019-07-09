@@ -1,0 +1,81 @@
+tree {
+	overflow-x: scroll;
+}
+
+leaf {
+	display: block;
+	position: relative;
+	margin: 0 .32rem .32rem .5rem;
+	width: 24rem;
+	border: .1rem solid #000;
+	background-image: linear-gradient(to top right, #ddd, #fff)
+}
+leaf:before {
+	content: "";
+	position:absolute;
+	width: calc(100% - .3rem);
+	left: 0;
+	bottom: 0;
+	height: 100%;
+	box-shadow: -.2rem .2rem .1rem rgba(0,0,0,.5);
+	pointer-events: none;
+}
+tree > leaf:before {
+	width: 100%;
+}
+
+leaf leaftitle {
+	display: inline-block;
+	margin: .5rem .5rem 0 .5rem;
+	padding: .25rem;
+	max-width: calc(100% - 4rem);
+}
+leaf leafvotes {
+	display: inline-block;
+	padding: .2rem;
+	margin: .5rem;
+	background-color: white;
+	border: .1rem solid #000;
+	right: 0;
+	position: absolute;
+}
+leaf description {
+	display: block;
+	font-size: .75rem;
+	background-color: white;
+	border: .1rem solid #000;
+	margin: .5rem;
+	padding: .1rem;
+}
+
+leaf forbar {
+	display: block;
+	height: 100%;
+	background-color: #0f0;
+	border-right: .1rem solid #000;
+}
+leaf votebar {
+	display: block;
+	height: .5rem;
+	background-color: #f00;
+	border-bottom: .1rem solid #000;
+}
+
+leaf leafvotes.out {
+	background-color: #fcc;
+}
+leaf leaftitle:before {
+	content: "● ";
+	color: #0a0;
+	margin: -.15rem .5rem 0 0;
+	float: left;
+}
+leaf leaftitle.out:before {
+	color: #a00;
+}
+
+@media only screen and (max-width: 32rem) {
+	leaf {
+		width: calc(100% - 1rem);
+	}
+}
