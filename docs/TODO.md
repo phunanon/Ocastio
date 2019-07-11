@@ -34,6 +34,8 @@
 - [ ] choice to always show ballot results
 - [ ] choose score precision
 - [ ] https://github.com/yogthos/lein-asset-minifier
+- [ ] Split db into separate namespaces
+- [ ] Use -? only for functions; use is- for variables
 
 ## Alpha
 

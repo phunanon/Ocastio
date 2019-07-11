@@ -69,6 +69,6 @@ function RemoveOption (el)
 
 //General
 document.addEventListener("DOMContentLoaded", () => { UpdateBallotDOM(); });
-document.addEventListener("DOMContentLoaded", () => { e('input[name="title"]').focus(); });
 if (isPoll)
   document.addEventListener("DOMContentLoaded", () => AddOption(e("div#options input")));
+document.addEventListener("DOMContentLoaded", () => { e('input[name="title"]').focus(); });
