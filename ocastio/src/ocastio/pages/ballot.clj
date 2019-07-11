@@ -33,7 +33,7 @@
         con-info  (db/con-info con-id)
         con-name  (:title con-info)
         con-laws  (db/con-laws con-id)]
-    (v/compose-page request "New Ballot" (page/include-js "/js/ballot.js") ;TODO merge into vote.js
+    (v/compose-page request "New Ballot" (page/include-js "/js/vote.js")
       [:p "Enter the details of the new ballot in " [:a {:href (str "/con/" con-id)} con-name] "."]
       (vote/make-form-new "ballot" "Ballot" con-id (make-law-table con-laws)))))
 

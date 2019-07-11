@@ -31,10 +31,11 @@
     [:p "These are all the organisations registered with Ocastio. " [:a {:href "/org/new"} "Register your own."]]
     [:ul (map make-org-link (db/orgs-stats))]))
 
+;TODO: destructuring and general improvement
 (defn org-page [request]
   (let [session (:session request)
         org-id  (get-in request [:route-params :org_id])
-        org-id  (Integer/parseInt org-id)
+        org-id  (Integer. org-id)
         email   (:email session)
         admin?  (db/org-admin? org-id email)
         info    (db/org-info org-id)

@@ -53,20 +53,24 @@ balopt span {
 	cursor: pointer;
 	display: inline-block;
 	background-color: #fff;
-	color: #fff;
 	text-align: center;
 	line-height: 1.6rem;
-	border-radius: 50%;
 	border: .15rem solid #000;
 	width: 1.5rem;
 	height: 1.5rem;
 	margin-right: .25rem;
 }
-[type="checkbox"] + label {
-	border-radius: unset;
+[type="radio"] + label {
+	border-radius: 50%;
+	color: #fff;
 }
-[type="radio"]:checked + label, [type="checkbox"]:checked + label {
+input:checked + label {
 	background-color: #000;
+}
+
+.inline {
+	display : flex;
+	align-items : center;
 }
 
 /*move into vote.css*/

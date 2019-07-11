@@ -75,7 +75,7 @@
              :as request} poll?]
   (let [ballot-id (Integer. ballot-id)
 
-        {:keys [title org_id method_id desc hours start num_win] :as info}
+        {:keys [title org_id method_id desc hours start num_win preresult] :as info}
           (db/ballot-info ballot-id)
 
         org-name  (:name (db/org-basic-info org_id))
@@ -86,7 +86,6 @@
         can-vote? (if poll?
           (db/can-poll-vote? org_id user-id)
           (db/can-ballot-vote? ballot-id user-id))
-        results?  true ;TODO from db
 
         con-id    (db/bal->con ballot-id)
         con-name  (:title (db/con-info con-id))
@@ -94,6 +93,7 @@
         admin?    (db/org-admin? org_id email)
         exec?     (db/con-exec? con-id email)
         state     (v/ballot-state start hours)
+        results?  (or (= state :complete) preresult)
 
         Type      (if poll? "Poll" "Ballot")
         type      (str/lower-case Type)]
@@ -139,51 +139,57 @@
         (util/anti-forgery-field)
         [:input {:type "text" :name "title" :placeholder (str Type " title") :maxlength 64}]
         [:textarea {:name "desc" :placeholder "Description" :maxlength 256}]
-        [:select {:name "method_id" :onchange (str "Update" Type "DOM(this)")}
+        [:select {:name "method_id" :onchange "UpdateBallotDOM(this)"}
           (map v/make-method-option (db/vote-methods))]
         option-form
         [:div#num_win
           [:p "Number of winning laws/options: " [:input#num_win {:name "num_win" :type "number" :value 1 :min 1 :max 16}]]]
         [:p "Dates and times are UTC."]
-        [:p "Starting at"
+        [:p.inline "Starting at"
           [:input {:type "date" :name "date" :value date-now}]
           [:input {:type "time" :name "time" :value time-now}]]
         [:p "Duration (days: 0-9, hours: 1-23):"]
-        [:p [:span#days]  "days"  [:input {:type "range" :name "days"  :value 0 :min 0 :max 9}]]
-        [:p [:span#hours] "hours" [:input {:type "range" :name "hours" :value 1 :min 1 :max 23}]]
+        [:p.inline
+          [:input {:type "range" :name "days"  :id "day"  :value 0 :min 0 :max 9}]
+          [:span#days "0 days"]]
+        [:p.inline
+          [:input {:type "range" :name "hours" :id "hour" :value 1 :min 1 :max 23}]
+          [:span#hours "1 hours"]]
+        [:p.inline
+          [:input {:type "checkbox" :name "preresult" :id "preresult"}
+          [:label {:for "preresult"}]
+          [:span "Permanently show results"]]]
         [:input {:type "submit"   :value "Post ballot"}]]))
 
 
-(defn process-new!-post [{:keys [title desc date time days hours method_id num_win]} {email :email}]
+(defn process-new!-post [{:keys [title desc date time days hours method_id num_win preresult]}
+                         {email :email}]
   "Browser [para sess] -> {:setting val}"
   { :title      title
     :desc       desc
-    :user-id    (db/email->id email)
-    :method-id  (Integer. method_id)
-    :num-win    (Integer. num_win)
+    :user_id    (db/email->id email)
+    :method_id  (Integer. method_id)
+    :num_win    (Integer. num_win)
     :start      (LocalDateTime/parse (str date " " time) v/date-format)
-    :hours      (+ (Integer. hours) (* (Integer. days) 24))})
-(defn settings-to-new-args [settings]
-  (select-values settings [:title :desc :org-id :user-id :method-id :num-win :start :hours]))
+    :hours      (+ (Integer. hours) (* (Integer. days) 24))
+    :preresult  (boolean preresult)})
 
-;TODO is admin, no crash on empty times, TODO find more things to do
+;TODO is admin, no crash on empty times, >1 options, TODO find more things to do
 (defn new-poll! [{para :params sess :session :as request}]
-  (let [settings  (process-new!-post para sess)
-        settings  (assoc settings :org-id (Integer. (:org_id para)))
-        options   (map second (select-opts para))
-        new-args  (settings-to-new-args settings)
-        poll-id   (apply db/ballot-new! new-args)]
+  (let [info    (process-new!-post para sess)
+        info    (assoc info :org_id (Integer. (:org_id para)))
+        options (map second (select-opts para))
+        poll-id (db/ballot-new! info)]
     (doseq [text options] (db/bal-opt-new! poll-id nil text))
     {:redir (str "/poll/" poll-id) :sess (:session request)}))
 
 ;TODO is exec, no crash on empty times, check ballot doesn't overlap, check laws are all from same con, perhaps remove /:con_id
 (defn new-ballot! [{para :params sess :session :as request}]
-  (let [settings  (process-new!-post para sess)
-        settings  (assoc settings :org-id nil)
+  (let [info      (process-new!-post para sess)
+        info      (assoc info :org_id nil)
         law-pairs (filter #(str/starts-with? (name (first %)) "law") (vec para))
         law-ids   (map #(extract-int (name (first %))) law-pairs)
-        new-args  (settings-to-new-args settings)
-        ballot-id (apply db/ballot-new! new-args)]
+        ballot-id (db/ballot-new! info)]
     (doseq [id law-ids] (db/bal-opt-new! ballot-id id nil))
     {:redir (str "/ballot/" ballot-id) :sess (:session request)}))
 

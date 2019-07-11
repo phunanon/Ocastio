@@ -172,8 +172,8 @@ WHERE law.law_id = ?" law-id])))
 ;TODO: memoize
 (defn vote-methods [] (jdbc/query db-spec ["SELECT method_id, name, desc, num_win FROM method"]))
 
-(defn ballot-new! [title desc org-id user-id method-id num-win start hours]
-  (first (vals (first (jdbc/insert! db-spec :ballot {:title title :desc desc :org_id org-id :user_id user-id :method_id method-id :num_win num-win :start start :hours hours})))))
+(defn ballot-new! [info]
+  (fvf (jdbc/insert! db-spec :ballot info)))
 
 (defn bal-del! [ballot-id]
   (jdbc/delete! db-spec :ballot ["ballot_id = ?" ballot-id]))
@@ -197,7 +197,7 @@ GROUP BY ballot.ballot_id
 ORDER BY count(opt_id) DESC" org-id]))
 
 (defn ballot-info [ballot-id]
-  (first (jdbc/query db-spec ["SELECT ballot.ballot_id, org_id, title, ballot.desc, method.method_id, method.name method, ballot.num_win, start, hours, COUNT(opt_id) num_opt
+  (first (jdbc/query db-spec ["SELECT ballot.ballot_id, org_id, title, ballot.desc, method.method_id, method.name method, ballot.num_win, start, hours, preresult, majority, range, COUNT(opt_id) num_opt
 FROM ballot
 JOIN method ON method.method_id = ballot.method_id
 JOIN bal_opt ON bal_opt.ballot_id = ballot.ballot_id
@@ -296,7 +296,7 @@ WHERE ballot_id = ?
 GROUP BY vote.opt_id" ballot-id ballot-id]))
 
 
-
+;TODO remove
 (comment
 (defn add-law-to-db
   [& [con_id parent_id title desc :as args]]

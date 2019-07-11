@@ -21,6 +21,6 @@
         org-id      (Integer. (:org_id para))
         org-info    (db/org-info org-id)
         org-name    (:name org-info)]
-    (v/compose-page request "New Poll" (page/include-js "/js/poll.js") ;TODO merge into vote.js
+    (v/compose-page request "New Poll" (page/include-js "/js/vote.js")
       [:p "Enter the details of the new poll in " [:a {:href (str "/org/" org-id)} org-name] "."]
       (vote/make-form-new "poll" "Poll" org-id option-form))))

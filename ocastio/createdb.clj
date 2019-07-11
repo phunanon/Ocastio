@@ -58,7 +58,9 @@
      [:num_win    "tinyint"]
      [:start      "timestamp"]
      [:hours      "smallint"]
-     [:preresult  "boolean"] ;TODO
+     [:preresult  "boolean"] ;TODO: show early results
+     [:majority   "tinyint"] ;TODO: winning majority percentage
+     [:range      "tinyint"] ;TODO: score range, 0-range
      org-fk user-fk method-fk])
   (jdbc/create-table-ddl :bal_opt
     [[:opt_id pk]
@@ -102,6 +104,9 @@
 (jdbc/insert! db-spec :method {:name "Single-Transferable" :desc "N options approved by transferred totals" :num_win true})
 (jdbc/insert! db-spec :method {:name "Mass Majority Approval" :desc "all options approved by majority" :num_win false})
 (jdbc/insert! db-spec :method {:name "Mass Score Approval" :desc "all options approved by score" :num_win false})
+
+;ALTER TABLE ballot
+;ADD name varchar(255);
 
 ;SELECT DISTINCT constraint_name FROM information_schema.constraints 
 ;WHERE table_name='LAW' AND column_list='CON_ID'

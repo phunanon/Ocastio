@@ -74,12 +74,16 @@ table td {
 form input, form textarea, form select {
 	display: block;
 	font-size: 1.25rem;
+	margin-left: .5rem;
+	margin-right: .5rem;
 }
-input[type="submit"] {
+[type="submit"] {
 	display: inline-block;
-	margin: 1rem;
+	margin: .5rem;
 }
-input[type="checkbox"], input[type="radio"] { margin: .25rem; }
+[type="checkbox"], [type="radio"] {
+	margin: .25rem;
+}
 input:checked + label {
 	background-color: #eee;
 }
