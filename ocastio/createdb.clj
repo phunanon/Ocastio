@@ -22,7 +22,7 @@
     [[:org_id     pk]
      date-field
      [:name       "varchar(128)"]
-     [:desc       "varchar(256)"]  ;
+     [:desc       "varchar(256)"]
      [:contact    "varchar(48)"]   ;TODO
      [:img        "varchar(128)"]])
   (jdbc/create-table-ddl :user
@@ -58,9 +58,9 @@
      [:num_win    "tinyint"]
      [:start      "timestamp"]
      [:hours      "smallint"]
-     [:preresult  "boolean"] ;TODO: show early results
-     [:majority   "tinyint"] ;TODO: winning majority percentage
-     [:range      "tinyint"] ;TODO: score range, 0-range
+     [:preresult  "boolean"] ;show early results
+     [:majority   "tinyint"] ;winning majority percentage
+     [:range      "tinyint"] ;score range, 0-range
      org-fk user-fk method-fk])
   (jdbc/create-table-ddl :bal_opt
     [[:opt_id pk]
@@ -91,7 +91,8 @@
     [[:method_id  pk]
      [:name       "varchar(48)"]
      [:desc       "varchar(64)"]
-     [:num_win    "boolean"]])
+     [:num_win    "boolean"]
+     [:is_score   "boolean"]])
 ])
 
 ;(jdbc/with-db-connection [conn {:dbtype "h2" :dbname "./ocastio"}]

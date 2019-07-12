@@ -7,11 +7,14 @@ function UpdateBallotDOM ()
   const sel = e("select");
   const option = sel.options[sel.selectedIndex];
   const hasNumWin = option.hasAttribute("data-num-win");
-  e("div#num_win").style.display = hasNumWin ? "block" : "none";
+  e("p#num_win").style.display  = hasNumWin ? "flex" : "none";
+  e("p#majority").style.display = hasNumWin ? "none" : "flex";
+  const isScore = option.hasAttribute("data-is-score");
+  e("p#range").style.display = isScore ? "flex" : "none";
   let maxNumOpt;
-  //if (isPoll) maxNumOpt = e("div#options").children.length - 1;
-  //else        maxNumOpt = e("table#laws").rows.length;
-  //e("input#num_win").max = maxNumOpt;
+  if (isPoll) maxNumOpt = e("div#options").children.length - 1;
+  else        maxNumOpt = e("table#laws").rows.length;
+  e("input#num_win").max = maxNumOpt;
 }
 
 function UpdateValue (el, word, that)

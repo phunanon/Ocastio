@@ -170,7 +170,10 @@ WHERE law.law_id = ?" law-id])))
 
 
 ;TODO: memoize
-(defn vote-methods [] (jdbc/query db-spec ["SELECT method_id, name, desc, num_win FROM method"]))
+(defn vote-methods []
+  (jdbc/query db-spec ["SELECT method_id, name, desc, num_win, is_score FROM method"]))
+(defn vote-method [method-id]
+  (first (jdbc/query db-spec ["SELECT name, desc, num_win, is_score FROM method WHERE method_id = ?" method-id])))
 
 (defn ballot-new! [info]
   (fvf (jdbc/insert! db-spec :ballot info)))
@@ -188,7 +191,7 @@ WHERE law.law_id = ?" law-id])))
 (defn poll? [ballot-id] (db-some? "ballot" "org_id" "ballot_id" ballot-id))
 
 (defn ballot-infos [org-id]
-  (jdbc/query db-spec ["SELECT ballot.ballot_id, title, ballot.desc, method.name method, method.method_id, ballot.num_win, start, hours, COUNT(opt_id) num_opt
+  (jdbc/query db-spec ["SELECT ballot.ballot_id, title, ballot.desc, method.name method, method.method_id, ballot.num_win, start, hours, COUNT(opt_id) num_opt, majority, range, preresult
 FROM ballot
 JOIN bal_opt ON bal_opt.ballot_id = ballot.ballot_id
 JOIN method ON method.method_id = ballot.method_id
@@ -221,13 +224,13 @@ WHERE law.con_id = ?
 GROUP BY ballot.ballot_id" con-id]))
 
 (defn bal->con [ballot-id]
-  (first (vals (first (jdbc/query db-spec ["SELECT con.con_id FROM con
+  (fvf (jdbc/query db-spec ["SELECT con.con_id FROM con
 JOIN law      ON law.con_id   = con.con_id
 JOIN bal_opt  ON bal_opt.law_id = law.law_id
-WHERE ballot_id = ?" ballot-id])))))
+WHERE ballot_id = ?" ballot-id])))
 
 (defn poll->org [ballot-id]
-  (first (vals (first (jdbc/query db-spec ["SELECT org_id FROM ballot WHERE ballot_id = ?" ballot-id])))))
+  (fvf (jdbc/query db-spec ["SELECT org_id FROM ballot WHERE ballot_id = ?" ballot-id])))
 
 (defn can-ballot-vote? [ballot-id user-id]
   (if (some nil? [ballot-id user-id])
@@ -271,7 +274,7 @@ GROUP BY user_id)" ballot-id])))
 JOIN bal_opt ON bal_opt.opt_id = vote.opt_id)"])))
 
 
-(defn vot-per-app [max-score ballot-id]
+(defn vot-per-app [ballot-id max-score]
   (jdbc/query db-spec [(str "
 SELECT opt_id, text, law_id,
        IFNULL(sum, 0) sum, max * " max-score " max, IFNULL((sum / (max * " max-score ")), 0) approval

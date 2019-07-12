@@ -46,24 +46,26 @@
   [:span
     [:input {:type "radio" :value value :name opt :id id}]
     [:label {:for id} value]])
-(defn make-score-input [{:keys [opt_id text] :as option}]
+(defn make-score-input [score-range {:keys [opt_id text] :as option}]
   (def opt (str "opt" opt_id))
   [:balopt
-    (map make-score-radio (range 0 5))
+    (map make-score-radio (range 0 score-range))
     [:span (v/make-option-text option)]])
 
-(defn make-option-form [options ballot-id method-id]
+(defn make-option-form [options ballot-id method-id range]
     [:form {:action (str "/vote/" ballot-id) :method "POST"}
       (util/anti-forgery-field)
       [:br]
-      (map
-        (case method-id
-          0 "n/a"
-          1 make-check-input
-          2 make-score-input
-          3 make-check-input
-          4 make-score-input)
-        options)
+      (let [check-in make-check-input
+            score-in (partial make-score-input range)]
+        (map
+          (case method-id
+            0 "n/a"
+            1 check-in
+            2 score-in
+            3 check-in
+            4 score-in)
+          options))
       [:input {:type "submit" :value "Cast vote"}]])
 
 (defn make-option-info [options]
@@ -75,7 +77,7 @@
              :as request} poll?]
   (let [ballot-id (Integer. ballot-id)
 
-        {:keys [title org_id method_id desc hours start num_win preresult] :as info}
+        {:keys [title org_id method_id desc hours start num_win majority range preresult] :as info}
           (db/ballot-info ballot-id)
 
         org-name  (:name (db/org-basic-info org_id))
@@ -121,12 +123,12 @@
               (if (and ongoing? can-vote?)
                 [:div
                   [:p.admin "You are eligible to vote."]
-                  (make-option-form options ballot-id method_id)])])
+                  (make-option-form options ballot-id method_id range)])])
           (if (and (not future?) results?)
             [:div
               [:h3 "Results"]
               [:p num-votes " " (v/plu "vote" num-votes) " total."]
-              (r/html ballot-id method_id num_win)])])
+              (r/html ballot-id method_id num_win range majority)])])
 
       (if (if poll? admin? exec?)
         (v/make-del-button (str "/bal/del/" ballot-id) type)))))
@@ -142,8 +144,16 @@
         [:select {:name "method_id" :onchange "UpdateBallotDOM(this)"}
           (map v/make-method-option (db/vote-methods))]
         option-form
-        [:div#num_win
-          [:p "Number of winning laws/options: " [:input#num_win {:name "num_win" :type "number" :value 1 :min 1 :max 16}]]]
+        [:p#num_win.inline
+          [:span "Number of winning laws/options: "]
+          [:input#num_win {:name "num_win" :type "number" :value 1 :min 1 :max 16}]]
+        [:p#majority.inline
+          [:span "Majority at "]
+          [:input#majority {:name "majority" :type "number" :value 50 :min 1 :max 100}]
+          [:span "%"]]
+        [:p#range.inline
+          [:span "Score range between 0 and "]
+          [:input#range {:name "range" :type "number" :value 5 :min 2 :max 16}]]
         [:p "Dates and times are UTC."]
         [:p.inline "Starting at"
           [:input {:type "date" :name "date" :value date-now}]
@@ -162,14 +172,17 @@
         [:input {:type "submit"   :value "Post ballot"}]]))
 
 
-(defn process-new!-post [{:keys [title desc date time days hours method_id num_win preresult]}
-                         {email :email}]
+(defn process-new!-post
+  [{:keys [title desc date time days hours method_id num_win range majority preresult]}
+   {email :email}]
   "Browser [para sess] -> {:setting val}"
   { :title      title
     :desc       desc
     :user_id    (db/email->id email)
     :method_id  (Integer. method_id)
     :num_win    (Integer. num_win)
+    :range      (Integer. range)
+    :majority   (Integer. majority)
     :start      (LocalDateTime/parse (str date " " time) v/date-format)
     :hours      (+ (Integer. hours) (* (Integer. days) 24))
     :preresult  (boolean preresult)})

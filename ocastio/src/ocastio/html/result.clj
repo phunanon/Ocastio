@@ -11,29 +11,27 @@
     [:td sum]
     [:td (format "%.1f" (* approval 100)) "%"]])
 
-(defn render-results [results num-win]
+(defn render-results [results num-win majority]
   [:table
     [:th "Option"] [:th "Sum"] [:th "Approval"]
     (map
       #(make-result-row %
         (if num-win
           (< %2 num-win)
-          (>= (:approval %) 0.5)))
+          (>= (:approval %) majority)))
       (sort-by :approval > results)
       (range))])
 
-(def functions {
-    ;num-win? func
-  0 [nil   str]
-  1 [false (partial db/vot-per-app 1.0)]
-  2 [false (partial db/vot-per-app 4.0)]
-  3 [true  (partial db/vot-per-app 1.0)]
-  4 [true  (partial db/vot-per-app 4.0)]})
-
-(defn html [ballot-id method-id num-win]
-  (let [func     (functions method-id)
-        num-win? (func 0)
-        func     (func 1)]
+(defn html [ballot-id method-id num-win score-range majority]
+  (let [info        (db/vote-method method-id)
+        is-num-win  (:num_win info)
+        is-score    (:is_score info)
+        majority    (/ majority 100)]
     (render-results
-      (func ballot-id)
-      (if num-win? num-win))))
+      (db/vot-per-app
+        ballot-id
+        (if is-score
+          (float (dec score-range))
+          1.0))
+      (if is-num-win num-win)
+      majority)))

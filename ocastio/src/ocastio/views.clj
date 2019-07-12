@@ -69,9 +69,13 @@
       [:body (make-header request) body]))
 
 
-(defn make-method-info [{:keys [method method_id num_win num_opt]}]
-  [:span method
-    (if (#{3 4 5} method_id) [:span " (" num_win "/" num_opt ")"])])
+(defn make-method-info [{:keys [method method_id num_win num_opt majority range preresult]}]
+  (let [facts [(if (#{3 4 5} method_id) (str num_win "/" num_opt " win"))
+               (if range (str "0-" range " range"))
+               (if preresult "early results")]
+        facts (filter some? facts)
+        facts (str/join ", " facts)]
+    [:span method " (" facts ")"]))
 
 (defn make-ballot-link [{:keys [ballot_id title num_win num_opt method method_id state] :as info} type]
   "Accepts [ballot-info ballot-type]"
@@ -99,14 +103,10 @@
     [:a {:href (str "/law/" law_id)}
     [:span title]]])
 
-(defn make-method-option [method]
-  (let [id        (:method_id method)
-        name      (:name method)
-        desc      (:desc method)
-        num-win?  (:num_win method)]
-    [:option
-      {:value id :data-num-win num-win?}
-      (str name " - " desc)]))
+(defn make-method-option [{:keys [method_id name desc num_win is_score]}]
+  [:option
+    {:value method_id :data-num-win num_win :data-is-score is_score}
+    (str name " - " desc)])
 
 (defn make-option-text [{:keys [text law_id title]}]
   (if (nil? text)

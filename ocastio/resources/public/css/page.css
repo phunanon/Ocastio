@@ -68,6 +68,10 @@ input:checked + label {
 	background-color: #000;
 }
 
+[type="number"] {
+	width: 4rem;
+}
+
 .inline {
 	display : flex;
 	align-items : center;
