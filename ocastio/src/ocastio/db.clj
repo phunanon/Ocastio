@@ -84,16 +84,28 @@ WHERE org_id = ?" org-id]))
 ;TODO: make db-true? with multiple WERE
 (defn org-admin? [org-id email]
   (def user-id (email->id email))
-  (not-empty (jdbc/query db-spec ["SELECT is_admin FROM org2user WHERE user_id = ? AND org_id = ? AND is_admin = true" user-id org-id])))
+  (-> (jdbc/query db-spec ["SELECT is_admin FROM org2user WHERE user_id = ? AND org_id = ? AND is_admin = true" user-id org-id])
+      (not-empty)
+      (boolean)))
 
 (defn user-in-org? [org-id user-id]
-  (not-empty (jdbc/query db-spec ["SELECT user_id FROM org2user WHERE user_id = ? AND org_id = ?" user-id org-id])))
+  (-> (jdbc/query db-spec ["SELECT user_id FROM org2user WHERE user_id = ? AND org_id = ?" user-id org-id])
+      (not-empty)
+      (boolean)))
 
 
 (defn orgs-by-con [con-id]
-  (:org_id (first (jdbc/query db-spec ["select * from org2con where con_id = ?" con-id]))))
+  (:org_id (first (jdbc/query db-spec ["SELECT * FROM org2con WHERE con_id = ?" con-id]))))
+
+(defn org-in-con? [org-id con-id]
+  (not-empty
+    (jdbc/query db-spec ["SELECT * FROM org2con WHERE org_id = ? AND con_id = ?" org-id con-id])))
+
+(defn rem-con-org! [org-id con-id]
+  (jdbc/delete! db-spec :org2con ["org_id = ? AND con_id = ?" org-id con-id]))
 
 (defn add-con-org! [org-id con-id is-exec]
+  (rem-con-org! org-id con-id)
   (jdbc/insert! db-spec :org2con {:org_id org-id :con_id con-id :is_exec is-exec}))
 
 ;TODO remove do

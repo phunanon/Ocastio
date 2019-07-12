@@ -43,18 +43,24 @@
           {:redir redir :sess (into session sess)})
       {:redir redir :sess (into session sess)})))
 
-(defn add-mem! [{{:keys [con-id org-id exec]} :params
-                 {:keys [email] :as sess}     :session :as request}]
-  (let [con-id (Integer. (re-find #"\d+$" con-id))
-        admin? (db/org-admin? org-id email)
-        exec?  (db/con-exec? con-id email)
-        exec   (= exec "true")]
-    (if exec
-      (if exec?
-        "") ;Do nothing, for now; TODO
-      (if admin?
-        (db/add-con-org! org-id con-id false))))
-  {:redir (str "/org/" org-id) :sess sess})
+;TODO: if org has adopted it can be made exec
+(defn add-mem! [{{:keys [con-id org-id exec adopt add redir]} :params
+                 {:keys [email] :as sess}                     :session}]
+  (let [con-id    (Integer. (re-find #"\d+$" con-id))
+        is-admin  (db/org-admin? org-id email)
+        is-exec   (db/con-exec? con-id email)
+        add-exec  (= exec "true")]
+    (if add-exec
+      (if (db/org-in-con? org-id con-id)
+        (if is-exec
+          (if add ;Than remove == true
+            (db/add-con-org! org-id con-id true)
+            (db/add-con-org! org-id con-id false))))
+      (if is-admin
+        (if adopt ;Than remove == true
+          (db/add-con-org! org-id con-id false)
+          (db/rem-con-org! org-id con-id))))
+    {:redir redir :sess sess}))
 
 (defn del! [{{email :email :as sess} :session
              {con-id :con-id}        :params}]
@@ -122,6 +128,16 @@
       [:quote desc]
       [:p "In total, " [:b num-mem] " people are affected by this constitution."]
     [:h3 "Oraganisations"]
+    (if exec?
+      [:section.admin
+        [:form {:action (str "/con/exe/" con-id"?redir=/con/" con-id) :method "POST"}
+          (util/anti-forgery-field)
+          [:input {:type "hidden" :name "exec" :value "true"}]
+          [:p "Add or remove an executive Organisation by ID or Ocastio URL:"]
+          [:input {:name "org-id" :placeholder "e.g. 7 or .../org/7"}]
+          [:input {:type "submit" :name "add" :value "Add"}]
+          [:input {:type "submit" :name "remove" :value "Remove"}]]
+          [:p "An Organisation must already have adopted this Constitution prior."]])
       [:ul (map make-org-link orgs)]
     [:h3 "Ballots"]
       (if (and exec? (not-empty laws)) [:p.admin [:a {:href (str "/ballot/new/" con-id)} "Post a new ballot"]])

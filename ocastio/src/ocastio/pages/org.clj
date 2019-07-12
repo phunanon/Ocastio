@@ -52,12 +52,12 @@
       [:quote desc]
       (if admin?
         [:section.admin
-          [:form {:action (str "/con/add/" org-id) :method "POST"}
+          [:form {:action (str "/con/mem/" org-id "?redir=/org/" org-id) :method "POST"}
             (util/anti-forgery-field)
-            [:input {:type "hidden" :name "exec" :value "false"}]
-            [:p "Adopt a Constitution by providing its ID or Ocastio URL:"]
-            [:input {:name "con-id"}]
-            [:input {:type "submit" :value "Adopt"}]]])
+            [:p "Adopt or remove a Constitution by ID or Ocastio URL:"]
+            [:input {:name "con-id" :placeholder "e.g. 7 or .../con/7"}]
+            [:input {:type "submit" :name "adopt" :value "Adopt"}]
+            [:input {:type "submit" :name "remove" :value "Remove"}]]])
       [:h3 "Constitutions"]
         (if admin? [:p.admin [:a {:href (str "/con/new/" org-id)} "New constitution"]])
         (if (empty? cons) [:p "Not a member of any constitutions."])
