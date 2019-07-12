@@ -23,7 +23,7 @@
       (range))])
 
 (defn html [ballot-id method-id num-win score-range majority]
-  (let [info        (db/vote-method method-id)
+  (let [info        (db/method-info method-id)
         is-num-win  (:num_win info)
         is-score    (:is_score info)
         majority    (/ majority 100)]

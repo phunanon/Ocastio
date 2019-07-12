@@ -69,15 +69,20 @@
       [:body (make-header request) body]))
 
 
-(defn make-method-info [{:keys [method method_id num_win num_opt majority range preresult]}]
-  (let [facts [(if (#{3 4 5} method_id) (str num_win "/" num_opt " win"))
-               (if range (str "0-" range " range"))
+(defn make-method-info [{:keys [method_id num_win num_opt majority range preresult]}]
+  (let [{name :name is-num-win :num_win is-score :is_score}
+          (db/method-info method_id)
+        facts [(if is-num-win
+                 (str num_win "/" num_opt " win")
+                 (str majority "% win"))
+               (if is-score (str "0-" range " range"))
                (if preresult "early results")]
         facts (filter some? facts)
         facts (str/join ", " facts)]
-    [:span method " (" facts ")"]))
+    [:span name " (" facts ")"]))
 
-(defn make-ballot-link [{:keys [ballot_id title num_win num_opt method method_id state] :as info} type]
+(defn make-ballot-link [{:keys [ballot_id title num_win num_opt method_id state] :as info}
+                        type]
   "Accepts [ballot-info ballot-type]"
   (def num-votes (db/ballot-num-votes ballot_id))
   (li-link
