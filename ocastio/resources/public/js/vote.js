@@ -14,7 +14,7 @@ function UpdateBallotDOM ()
   let maxNumOpt;
   if (isPoll) maxNumOpt = e("div#options").children.length - 1;
   else        maxNumOpt = e("table#laws").rows.length;
-  e("input#num_win").max = maxNumOpt;
+  e("input#num_win").max = maxNumOpt == 0 ? 1 : maxNumOpt;
 }
 
 function UpdateValue (el, word, that)
