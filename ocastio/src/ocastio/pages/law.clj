@@ -9,7 +9,7 @@
 (def get-para #(get-in % [:params %2]))
 (def get-sess #(get-in % [:session %2]))
 
-(defn page [request]
+(defn page [request compose]
   (let [get-para    (partial get-para request)
         get-sess    (partial get-sess request)
         law-id      (get-para :law_id)
@@ -24,7 +24,7 @@
         children    (db/law-children law-id)
         email       (get-sess :email)
         is-exec?    (db/con-exec? con-id email)]
-  (v/compose-page request (str "Law: " title) nil
+  (compose (str "Law: " title) nil
     [:navinfo "Part of " [:a {:href (str "/con/" con-id)} con-name] "."
     (if (some? parent-id) [:span " A child of " [:a {:href (str "/law/" parent-id)} parent-name] "."])]
     [:h2 "Law: " title]
@@ -34,7 +34,7 @@
     [:p.admin [:a {:href (str "/law/new/" con-id "/" law-id)} "Create a child law"] "."])
   [:ul (map v/make-law-link children)])))
 
-(defn page-new [request]
+(defn page-new [request compose]
   (let [get-para    (partial get-para request)
         get-sess    (partial get-sess request)
         session     (:session request)
@@ -47,7 +47,7 @@
         con-info    (db/con-info con-id)
         con-name    (:title con-info)
         con-link    (str "/con/" con-id)]
-    (v/compose-page request "New law" nil
+    (compose "New law" nil
       [:p "Enter the details of the new law, for " [:a {:href con-link} con-name] "."]
       [:form {:action uri :method "POST"}
         (util/anti-forgery-field)

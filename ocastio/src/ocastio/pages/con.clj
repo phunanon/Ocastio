@@ -10,7 +10,7 @@
 (def get-para #(get-in % [:params %2])) ;TODO: remove
 (def get-sess #(get-in % [:session %2]))
 
-(defn page-new [request]
+(defn page-new [request compose]
   (let [get-para  (partial get-para request)
         get-sess  (partial get-sess request)
         session   (:session request)
@@ -18,7 +18,7 @@
         org-id    (get-para :org-id)
         org-info  (db/org-info org-id)
         org-name  (:name org-info)]
-    (v/compose-page request "New constitution" nil
+    (compose "New constitution" nil
       [:p "Enter the details of the new constitution for " [:a {:href (str "/org/" org-id)} org-name] "."]
       [:form {:action uri :method "POST"}
         (util/anti-forgery-field)
@@ -102,7 +102,7 @@
 
 
 ; TODO admin+exec check
-(defn page [request]
+(defn page [request compose]
   (let [get-para  (partial get-para request)
         get-sess  (partial get-sess request)
         con-id    (get-para :con-id)
@@ -117,7 +117,7 @@
         exec?  (db/con-exec? con-id email)
 
         ballots   (db/con-ballots con-id)]
-    (v/compose-page request title (page/include-css "/css/constitution.css")
+    (compose title (page/include-css "/css/constitution.css")
     (if exec? [:p.admin "You are an admin of an executive organisation."])
     [:h2 title [:grey " | Constitution"]]
       [:quote desc]

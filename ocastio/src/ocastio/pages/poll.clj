@@ -7,7 +7,7 @@
     [hiccup.page :as page]
     [ring.util.anti-forgery :as util]))
 
-(defn page [request] (vote/page request true)) ;
+(defn page [request compose] (vote/page request compose true)) ;
 (defn new! [request] (vote/new-poll! request)) ;TODO shortcut
 
 (def option-form
@@ -16,11 +16,11 @@
     [:div#options
       [:input {:type "text" :name "opt0" :placeholder "Option body" :onkeydown "return OptionKey(event, this)"}]]])
 
-(defn page-new [{para :params :as request}]
+(defn page-new [{para :params :as request} compose]
   (let [methods     (db/vote-methods)
         org-id      (Integer. (:org_id para))
         org-info    (db/org-info org-id)
         org-name    (:name org-info)]
-    (v/compose-page request "New Poll" (page/include-js "/js/vote.js")
+    (compose "New Poll" (page/include-js "/js/vote.js")
       [:p "Enter the details of the new poll in " [:a {:href (str "/org/" org-id)} org-name] "."]
       (vote/make-form-new "poll" "Poll" org-id option-form))))

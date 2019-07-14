@@ -25,13 +25,13 @@
     (str "/con/" con_id)))
 
 
-(defn orgs-page [request]
-  (v/compose-page request "Organisations" nil
+(defn orgs-page [request compose]
+  (compose "Organisations" nil
     [:p "These are all the organisations registered with Ocastio. " [:a {:href "/org/new"} "Register your own."]]
     [:ul (map make-org-link (db/orgs-stats))]))
 
 ;TODO: destructuring and general improvement
-(defn org-page [request]
+(defn org-page [request compose]
   (let [session (:session request)
         org-id  (get-in request [:route-params :org_id])
         org-id  (Integer. org-id)
@@ -43,7 +43,7 @@
         desc    (:desc info)
         cons    (db/con-infos org-id)
         polls   (db/ballot-infos org-id)]
-    (v/compose-page request name nil
+    (compose name nil
       [:h2 name [:grey " | Organisation"]]
       [:p [(if admin? :a :span)
         {:href (str "/org/mems/" org-id)}
@@ -67,13 +67,13 @@
         (v/make-ballot-links polls "poll"))))
 
 ;TODO: advocate auth func
-(defn page-mems [{{email :email :as sess} :session :as request}]
+(defn page-mems [{{email :email :as sess} :session :as request} compose]
   (let [org-id  (get-in request [:route-params :org-id])
         org-id  (Integer/parseInt org-id)
         admin?  (db/org-admin? org-id email)
         info    (db/org-info org-id)
         name    (:name info)]
-    (v/compose-page request "Members management" nil
+    (compose "Members management" nil
       [:p.admin "Administrative section for " (v/org-link org-id name) "."]
       [:h2 "Members Management"]
       [:p "Add members by providing their emails below (one per line). Add ! at the start of the email to make them admins."]
@@ -84,8 +84,8 @@
       [:ul
         (map str (db/org-mems org-id))])))
 
-(defn page-new [request]
-  (v/compose-page request "New Organisation" nil
+(defn page-new [request compose]
+  (compose "New Organisation" nil
     [:p "Enter the details of your new organisation."]
     [:form {:action "/org/new" :method "POST"}
       (util/anti-forgery-field)

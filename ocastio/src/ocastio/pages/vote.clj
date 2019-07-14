@@ -74,7 +74,7 @@
 ;TODO: Ensure ballot-id is sane
 (defn page [{{ballot-id :ballot_id} :params
              {:keys [email]}        :session
-             :as request} poll?]
+             :as request} compose poll?]
   (let [ballot-id (Integer. ballot-id)
 
         {:keys [title org_id method_id desc hours start num_win majority range preresult] :as info}
@@ -99,7 +99,7 @@
 
         Type      (if poll? "Poll" "Ballot")
         type      (str/lower-case Type)]
-    (v/compose-page request (str title " | " Type) nil
+    (compose (str title " | " Type) nil
       (if poll?
         [:navinfo "Conducted by "  [:a {:href (str "/org/" org_id)} org-name] "."]
         [:navinfo "Conducted for " [:a {:href (str "/con/" con-id)} con-name] "."])

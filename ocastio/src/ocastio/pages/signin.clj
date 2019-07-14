@@ -12,10 +12,11 @@
   :email-invalid  "The email supplied is invalid."})
 
 ; TODO don't allow empty username, password
-(defn page [{{sess :session redir :redir :as para} :params :as request}]
+(defn page [{{sess :session redir :redir :as para} :params :as request}
+            compose]
   (let [action    (if (nil? redir) "/sign" (str "/sign?redir=" redir))
         sign-err  (:sign-err sess)]
-    (v/compose-page request "Signin" nil
+    (compose "Signin" nil
       [:p "Signin or register as an Ocastio user."]
       (if (some? sign-err) [:b (sign-err error-messages)])
       [:form {:action action :method "POST"}

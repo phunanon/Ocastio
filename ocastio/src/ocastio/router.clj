@@ -9,6 +9,7 @@
     [ocastio.pages.con     :as con]
     [ocastio.pages.law     :as law]
     [ocastio.db :as db]
+    [ocastio.views :as v]
     [ring.util.response :as resp]))
 
 (defn make-response [body]
@@ -48,9 +49,10 @@
           entry       (where pages)
           maker       (entry 0)
           authed?     ((entry 1) para sess)
+          compose     (partial v/compose-page request)
           sign-redir  (str "/signin?redir=" (:uri request))]
       (if authed?
-        (make-response (maker request))
+        (make-response (maker request compose))
         (resp/redirect sign-redir)))
     (make-response (str "router: unknown page: " where))))
 

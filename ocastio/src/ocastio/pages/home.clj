@@ -20,8 +20,8 @@
 
 (def early [["Eodus" "a test micronation." "/"]])
 
-(defn page [request]
-  (v/compose-page request "Home" nil
+(defn page [request compose]
+  (compose "Home" nil
     [:div#stats (gen-stats)]
     [:h2 "Welcome"]
     [:b "Ocastio enables organisations to post ballots and compose constitutions."]
