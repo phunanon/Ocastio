@@ -19,6 +19,8 @@
 (defn signed?    [para sess] (contains? sess :email))
 (defn org-admin? [{:keys [org-id]} {:keys [email]}]
   (db/org-admin? org-id email))
+(defn con-exec? [{:keys [con-id]} {:keys [email]}]
+  (db/con-exec? con-id email))
 
 (def pages {
             ;maker          auth func
@@ -62,7 +64,7 @@
   :poll-new [pol/new!       signed?] ;TODO
   :con-new  [con/new!       org-admin?]
   :con-mem  [con/add-mem!   org-admin?]
-  :con-del  [con/del!       signed?] ;TODO
+  :con-del  [con/del!       con-exec?]
   :law-new  [law/new!       signed?] ;TODO
   :bal-new  [bal/new!       signed?] ;TODO
   :bal-del  [vot/del!       signed?] ;TODO

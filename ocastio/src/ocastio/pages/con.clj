@@ -39,9 +39,9 @@
   (db/con-new! org-id title desc)
   {:redir redir :sess session}))
 
-;TODO: if org has adopted it can be made exec
 (defn add-mem! [{{:keys [con-id org-id exec adopt add redir]} :params
                  {:keys [email] :as sess}                     :session}]
+  "If an org has adopted a con it is made an exec, otherwise org adopts con."
   (let [con-id    (Integer. (re-find #"\d+$" con-id))
         is-admin  (db/org-admin? org-id email)
         is-exec   (db/con-exec? con-id email)
@@ -58,10 +58,9 @@
           (db/rem-con-org! org-id con-id))))
     {:redir redir :sess sess}))
 
-(defn del! [{{email :email :as sess} :session
-             {con-id :con-id}        :params}]
-  (if (db/con-exec? con-id email)
-    (db/con-del! con-id))
+(defn del! [{sess            :session
+            {:keys [con-id]} :params}]
+  (db/con-del! con-id)
   {:redir "/orgs" :sess sess})
 
 
