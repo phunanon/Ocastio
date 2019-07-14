@@ -60,10 +60,10 @@
   :sign     [sig/sign!      no-auth]
   :signout  [sig/signout    no-auth]
   :org-new  [org/new!       signed?]
-  :org-mem  [org/add-mems!  signed?] ;TODO
+  :org-mem  [org/add-mems!  org-admin?]
   :poll-new [pol/new!       signed?] ;TODO
   :con-new  [con/new!       org-admin?]
-  :con-mem  [con/add-mem!   org-admin?]
+  :con-mem  [con/add-mem!   signed?]
   :con-del  [con/del!       con-exec?]
   :law-new  [law/new!       signed?] ;TODO
   :bal-new  [bal/new!       signed?] ;TODO
