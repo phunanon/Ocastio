@@ -8,14 +8,17 @@
     [ocastio.pages.vote    :as vot]
     [ocastio.pages.con     :as con]
     [ocastio.pages.law     :as law]
+    [ocastio.db :as db]
     [ring.util.response :as resp]))
 
 (defn make-response [body]
   (-> (resp/response body)
       (resp/content-type "text/html")))
 
-(defn no-auth [sess] true)
-(defn signed? [sess] (contains? sess :email))
+(defn no-auth    [para sess] true)
+(defn signed?    [para sess] (contains? sess :email))
+(defn org-admin? [{:keys [org-id]} {:keys [email]}]
+  (db/org-admin? org-id email))
 
 (def pages {
             ;maker          auth func
@@ -38,10 +41,11 @@
 
 (defn page [request where]
   (if (contains? pages where)
-    (let [sess        (:session request)
+    (let [para        (:params request)
+          sess        (:session request)
           entry       (where pages)
           maker       (entry 0)
-          authed?     ((entry 1) sess)
+          authed?     ((entry 1) para sess)
           sign-redir  (str "/signin?redir=" (:uri request))]
       (if authed?
         (make-response (maker request))
@@ -49,7 +53,6 @@
     (make-response (str "router: unknown page: " where))))
 
 
-;TODO: use auth funcs
 (def posts {
             ;maker          auth func
   :sign     [sig/sign!      no-auth]
@@ -57,7 +60,7 @@
   :org-new  [org/new!       signed?]
   :org-mem  [org/add-mems!  signed?] ;TODO
   :poll-new [pol/new!       signed?] ;TODO
-  :con-new  [con/new!       signed?] ;TODO
+  :con-new  [con/new!       org-admin?]
   :con-mem  [con/add-mem!   signed?] ;TODO
   :con-del  [con/del!       signed?] ;TODO
   :law-new  [law/new!       signed?] ;TODO
@@ -69,13 +72,14 @@
 ;TODO: make :sess optional for doer's
 (defn do-action [request what]
   "Returns {:redir location, :sess newSession}"
-  (let [sess       (:session request)
+  (let [para       (:params request)
+        sess       (:session request)
         entry      (what posts)
         doer       (nth entry 0)
-        authed?    ((entry 1) sess)]
-      (if authed?
-        (doer request)
-        {:redir (:referer request) :sess sess})))
+        authed?    ((entry 1) para sess)]
+    (if authed?
+      (doer request)
+      {:redir (:referer request) :sess sess})))
 
 (defn post [request what]
   (if (some? (what posts))

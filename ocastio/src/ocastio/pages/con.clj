@@ -15,7 +15,7 @@
         get-sess  (partial get-sess request)
         session   (:session request)
         uri       (:uri request)
-        org-id    (get-para :org_id)
+        org-id    (get-para :org-id)
         org-info  (db/org-info org-id)
         org-name  (:name org-info)]
     (v/compose-page request "New constitution" nil
@@ -30,18 +30,14 @@
 (defn new! [request]
   (let [get-para  (partial get-para request)
         get-sess  (partial get-sess request)
-        org-id    (get-para :org_id)
+        org-id    (get-para :org-id)
         email     (get-sess :email)
-        admin?    (db/org-admin? org-id email)
         session   (:session request)
-        sess      {}
         redir     (str "/org/" org-id)
         title     (get-para :title)
         desc      (get-para :desc)]
-    (if admin?
-      (do (db/con-new! org-id title desc)
-          {:redir redir :sess (into session sess)})
-      {:redir redir :sess (into session sess)})))
+  (db/con-new! org-id title desc)
+  {:redir redir :sess session}))
 
 ;TODO: if org has adopted it can be made exec
 (defn add-mem! [{{:keys [con-id org-id exec adopt add redir]} :params
@@ -110,7 +106,7 @@
 (defn page [request]
   (let [get-para  (partial get-para request)
         get-sess  (partial get-sess request)
-        con-id    (get-para :con_id)
+        con-id    (get-para :con-id)
         con-id    (Integer. con-id)
         orgs      (db/con-orgs-info con-id)
         laws      (db/con-laws con-id)
