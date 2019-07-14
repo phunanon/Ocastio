@@ -187,7 +187,7 @@
     :hours      (+ (Integer. hours) (* (Integer. days) 24))
     :preresult  (boolean preresult)})
 
-;TODO is admin, no crash on empty times, >1 options, TODO find more things to do
+;TODO no crash on empty times, >1 options, TODO find more things to do
 (defn new-poll! [{para :params sess :session :as request}]
   (let [info    (process-new!-post para sess)
         info    (assoc info :org_id (Integer. (:org_id para)))

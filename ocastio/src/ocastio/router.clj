@@ -61,11 +61,11 @@
   :signout  [sig/signout    no-auth]
   :org-new  [org/new!       signed?]
   :org-mem  [org/add-mems!  org-admin?]
-  :poll-new [pol/new!       signed?] ;TODO
+  :poll-new [pol/new!       org-admin?]
   :con-new  [con/new!       org-admin?]
   :con-mem  [con/add-mem!   signed?]
   :con-del  [con/del!       con-exec?]
-  :law-new  [law/new!       signed?] ;TODO
+  :law-new  [law/new!       con-exec?]
   :bal-new  [bal/new!       signed?] ;TODO
   :bal-del  [vot/del!       signed?] ;TODO
   :vote     [vot/vote!      signed?] ;TODO
