@@ -61,7 +61,7 @@
   :org-mem  [org/add-mems!  signed?] ;TODO
   :poll-new [pol/new!       signed?] ;TODO
   :con-new  [con/new!       org-admin?]
-  :con-mem  [con/add-mem!   signed?] ;TODO
+  :con-mem  [con/add-mem!   org-admin?]
   :con-del  [con/del!       signed?] ;TODO
   :law-new  [law/new!       signed?] ;TODO
   :bal-new  [bal/new!       signed?] ;TODO

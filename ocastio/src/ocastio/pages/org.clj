@@ -114,14 +114,12 @@
       (do (db/org-new! email name desc contact)
           (return redirect {})))))
 
-;TODO: short-circuit non-admins quicker; advocate POST admin auth functions
 (defn add-mems! [request]
   (let [get-param (partial get-param request)
         get-sess  (partial get-sess  request)
         org-id    (get-param :org_id)
         org-id    (Integer/parseInt org-id)
         email     (get-sess :email)
-        admin?    (db/org-admin? org-id email)
         new-mems  (get-param :emails)
         new-mems  (vec (set (split-by-whitespace new-mems)))
         admin?    #(str/starts-with? % "!")
@@ -129,7 +127,6 @@
         new-mems  (filter #(db/email-exists? (:email %)) new-mems)
         new-mems  (map #(assoc % :user-id (db/email->id (:email %))) new-mems) ;TODO use nil from email->id
         new-mems  (filter #(not (db/user-in-org? org-id (:user-id %))) new-mems)]
-    (if admin?
-      (doseq [{:keys [user-id admin?]} new-mems]
-        (db/add-to-org! org-id user-id admin?)))
+    (doseq [{:keys [user-id admin?]} new-mems]
+      (db/add-to-org! org-id user-id admin?))
     {:redir (str "/org/" org-id) :sess (:session request)}))
