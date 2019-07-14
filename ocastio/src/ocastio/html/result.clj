@@ -2,8 +2,7 @@
   (:require
     [ocastio.db      :as db]
     [ocastio.views   :as v]
-    [clojure.string :as str]
-    [hiccup.page :as page]))
+    [clojure.string :as str]))
 
 (defn make-result-row [{:keys [text law_id sum approval]} won?]
   [(if won? :tr.won :tr)

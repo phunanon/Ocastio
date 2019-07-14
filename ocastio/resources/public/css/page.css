@@ -72,6 +72,11 @@ input:checked + label {
 	width: 4rem;
 }
 
+.org stat {
+	display: inline-block;
+	width: 3rem;
+}
+
 .inline {
 	display : flex;
 	align-items : center;

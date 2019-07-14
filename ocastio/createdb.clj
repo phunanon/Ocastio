@@ -23,8 +23,8 @@
      date-field
      [:name       "varchar(128)"]
      [:desc       "varchar(256)"]
-     [:contact    "varchar(48)"]   ;TODO
-     [:img        "varchar(128)"]])
+     [:contact    "varchar(48)"]    ;TODO
+     [:img        "varchar(128)"]]) ;TODO
   (jdbc/create-table-ddl :user
     [[:user_id    pk]
      date-field

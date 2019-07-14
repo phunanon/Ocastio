@@ -8,13 +8,12 @@
 (defn split-by-whitespace [s]
   (clojure.string/split s #"\s+"))
 
-(defn make-org-link [{:keys [org_id name members cons img]}]
+(defn make-org-link [{:keys [org_id name num-mem num-con num-pol img]}]
   (v/li-link
-    [:span
+    [:span.org
       [:img.small {:src img}]
       [:bl name] [:br]
-      [:span (str members " " (v/plu "member" members) ", "
-                  cons " " (v/plu "constitution" cons))]]
+      [:stat "👥 " num-mem] [:stat "📜 " num-con] [:stat "📊 " num-pol]]
     (str "/org/" org_id)))
 
 (defn make-con-link [{:keys [con_id title desc is_exec]}]
