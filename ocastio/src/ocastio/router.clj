@@ -31,7 +31,7 @@
   :org-new  [org/page-new   signed?]
   :org      [org/org-page   no-auth]
   :org-mems [org/page-mems  signed?] ;TODO
-  :poll-new [pol/page-new   signed?] ;TODO
+  :pol-new  [pol/page-new   signed?] ;TODO
   :poll     [pol/page       no-auth]
   :con      [con/page       no-auth]
   :con-new  [con/page-new   signed?] ;TODO
@@ -63,14 +63,14 @@
   :signout  [sig/signout    no-auth]
   :org-new  [org/new!       signed?]
   :org-mem  [org/add-mems!  org-admin?]
-  :poll-new [pol/new!       org-admin?]
+  :pol-new  [vot/new-pol!   org-admin?]
   :con-new  [con/new!       org-admin?]
   :con-mem  [con/add-mem!   signed?]
   :con-del  [con/del!       con-exec?]
   :law-new  [law/new!       con-exec?]
-  :bal-new  [bal/new!       signed?] ;TODO
-  :bal-del  [vot/del!       signed?] ;TODO
-  :vote     [vot/vote!      signed?] ;TODO
+  :bal-new  [vot/new-bal!   con-exec?]
+  :bal-del  [vot/del!       signed?]
+  :vote     [vot/vote!      signed?]
 })
 
 ;TODO: make :sess optional for doer's
@@ -89,7 +89,7 @@
   (if (some? (what posts))
     (let [result   (do-action request what)
           session  (:sess  result)
-          redirect (:redir result)]
+          redirect (:redir result)] ;TODO: rename :next
       (-> (resp/redirect redirect)
           (assoc :session session)
           (resp/content-type "text/html")))

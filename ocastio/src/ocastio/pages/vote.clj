@@ -187,24 +187,24 @@
     :hours      (+ (Integer. hours) (* (Integer. days) 24))
     :preresult  (boolean preresult)})
 
-;TODO no crash on empty times, >1 options, TODO find more things to do
-(defn new-poll! [{para :params sess :session :as request}]
+;TODO is admin, no crash on empty times, >1 options, TODO find more things to do
+(defn new-pol! [{{:keys [org-id] :as para} :params sess :session}]
   (let [info    (process-new!-post para sess)
-        info    (assoc info :org_id (Integer. (:org_id para)))
+        info    (assoc info :org_id (Integer. org-id))
         options (map second (select-opts para))
         poll-id (db/ballot-new! info)]
     (doseq [text options] (db/bal-opt-new! poll-id nil text))
-    {:redir (str "/poll/" poll-id) :sess (:session request)}))
+    {:redir (str "/poll/" poll-id) :sess sess}))
 
-;TODO is exec, no crash on empty times, check ballot doesn't overlap, check laws are all from same con, perhaps remove /:con_id
-(defn new-ballot! [{para :params sess :session :as request}]
+;TODO is exec, no crash on empty times, check ballot doesn't overlap, check laws are all from same con
+(defn new-bal! [{{:keys [con-id] :as para} :params
+                 sess                      :session}]
   (let [info      (process-new!-post para sess)
-        info      (assoc info :org_id nil)
         law-pairs (filter #(str/starts-with? (name (first %)) "law") (vec para))
         law-ids   (map #(extract-int (name (first %))) law-pairs)
         ballot-id (db/ballot-new! info)]
     (doseq [id law-ids] (db/bal-opt-new! ballot-id id nil))
-    {:redir (str "/ballot/" ballot-id) :sess (:session request)}))
+    {:redir (str "/ballot/" ballot-id) :sess sess}))
 
 
 (defn del! [{{ballot-id :ballot-id}   :params

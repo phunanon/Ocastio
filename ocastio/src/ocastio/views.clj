@@ -2,9 +2,10 @@
   (:require
     [ocastio.db :as db]
     [clojure.string :as str]
+    [clj-time.core :as t]
     [hiccup.page :as page]
     [ring.util.anti-forgery :as util])
-  (:import (java.time Instant ZoneId LocalDateTime format.DateTimeFormatter)))
+  (:import (java.time Instant ZoneId LocalDateTime format.DateTimeFormatter)))  ;TODO phase-out in preference of clj-time
 
 (defn org-link [org-id name] [:a {:href (str "/org/" org-id)} name])
 
@@ -32,7 +33,7 @@
 (def ^:const hour-secs (* 60 60))
 (defn ballot-state [start hours]
   "Returns :future :ongoing or :complete"
-  (let [times [(System/currentTimeMillis) (inst-ms start)]
+  (let [times (map inst-ms [(t/now) start])
         times (map #(quot % 1000) times)
         diff  (apply - times)]
     (if (neg? diff)
