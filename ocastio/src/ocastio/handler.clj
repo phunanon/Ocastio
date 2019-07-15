@@ -32,7 +32,7 @@
   (POST "/con/mem/:org-id"            req (rou/post req :con-mem))
   (POST "/con/exe/:con-id"            req (rou/post req :con-mem))
   (POST "/con/del/:con-id"            req (rou/post req :con-del))
-  (GET  "/law/:law_id"                req (rou/page req :law))
+  (GET  "/law/:law-id"                req (rou/page req :law))
   (GET  "/law/new/:con-id/:parent-id" req (rou/page req :law-new))
   (POST "/law/new/:con-id/:parent-id" req (rou/post req :law-new))
   (GET  "/ballots"                    req (rou/page req :ballots))

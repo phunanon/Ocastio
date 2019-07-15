@@ -89,39 +89,22 @@
     [:p "Enter the details of your new organisation."]
     [:form {:action "/org/new" :method "POST"}
       (util/anti-forgery-field)
-      [:input {:placeholder "Organisation name" :name "name" :value (:form-name (:session request))}] ;TODO remove re-fill logic
+      [:input {:placeholder "Organisation name" :name "name"}]
       [:textarea {:name "desc" :placeholder "Organisation description"}]
       [:input {:name "contact" :placeholder "Contact link"}]
       [:input {:type "submit" :value "Register" :name "register"}]]))
 
-(def get-param #(get-in % [:params %2])) ;TODO: remove
-(def get-sess  #(get-in % [:session %2]))
+(defn new! [{{:keys [name desc contact]} :params
+             {:keys [email] :as sess}    :session}]
+  (if (db/org-name-exists? name)
+    {:redir "/org/new" :sess (into sess {:new-org-error :exists})}
+    (do (db/org-new! email name desc contact)
+        {:redir "/orgs" :sess sess})))
 
-;TODO generally improve
-(defn new! [request]
-  (let [get-param (partial get-param request)
-        get-sess  (partial get-sess  request)
-        name      (get-param :name)
-        desc      (get-param :desc)
-        contact   (get-param :contact)
-        email     (get-sess  :email)
-        exists?   (db/org-name-exists? name)
-        redirect  (if exists? "/org/new" "/orgs")
-        session   (:session request)
-        return    (fn [redir sess] {:redir redir :sess (into session sess)})]
-    (if exists?
-      (return "/org/new" {:new-org-error :exists})
-      (do (db/org-new! email name desc contact)
-          (return redirect {})))))
-
-(defn add-mems! [request]
-  (let [get-param (partial get-param request)
-        get-sess  (partial get-sess  request)
-        org-id    (get-param :org_id)
-        org-id    (Integer/parseInt org-id)
-        email     (get-sess :email)
-        new-mems  (get-param :emails)
-        new-mems  (vec (set (split-by-whitespace new-mems)))
+(defn add-mems! [{{:keys [org_id emails]}  :params
+                  {:keys [email] :as sess} :session}]
+  (let [org-id    (Integer. org_id)
+        new-mems  (vec (set (split-by-whitespace emails)))
         admin?    #(str/starts-with? % "!")
         new-mems  (map #(hash-map :admin? (admin? %) :email (str/replace % #"!" "")) new-mems)
         new-mems  (filter #(db/email-exists? (:email %)) new-mems)
@@ -129,4 +112,4 @@
         new-mems  (filter #(not (db/user-in-org? org-id (:user-id %))) new-mems)]
     (doseq [{:keys [user-id admin?]} new-mems]
       (db/add-to-org! org-id user-id admin?))
-    {:redir (str "/org/" org-id) :sess (:session request)}))
+    {:redir (str "/org/" org-id) :sess sess}))
