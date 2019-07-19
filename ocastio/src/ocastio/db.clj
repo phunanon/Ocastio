@@ -297,36 +297,3 @@ FROM (SELECT opt_id, text, law_id,
         (SELECT SUM(vote.value) FROM vote
         WHERE vote.opt_id = bal_opt.opt_id) sum
     FROM bal_opt WHERE ballot_id = ?)") ballot-id]))
-
-;TODO useless
-(defn vot-high-app [ballot-id]
-  (jdbc/query db-spec ["
-SELECT vote.opt_id, bal_opt.text, bal_opt.law_id, SUM(vote.value) sum, SUM(vote.value)*1.0/
-    NULLIF(SELECT SUM(vote.value)
-    FROM vote
-    JOIN bal_opt ON bal_opt.opt_id = vote.opt_id
-    WHERE bal_opt.ballot_id = ?, 0) approval
-FROM vote
-JOIN bal_opt ON bal_opt.opt_id = vote.opt_id
-WHERE ballot_id = ?
-GROUP BY vote.opt_id" ballot-id ballot-id]))
-
-
-;TODO remove
-(comment
-(defn add-law-to-db
-  [& [con_id parent_id title desc :as args]]
-  (let [results (jdbc/insert! db-spec :constitution (zipmap [:con_id :parent_id :title :desc] args))]
-    (assert (= (count results) 1))
-    (first (vals (first results)))))
-
-(defn delete-law [{:keys [law_id]}]
-    (jdbc/delete! db-spec :constitution ["law_id=?" law_id]))
-
-(defn get-all-laws []
-  (map #(assoc % :vote% (rand 100))
-        (jdbc/query db-spec "select * from constitution")))
-
-(defn get-const-laws [const_id]
-  (map #(assoc % :vote% (rand 100))
-        (jdbc/query db-spec ["select * from constitution where const_id = ?" const_id]))))
