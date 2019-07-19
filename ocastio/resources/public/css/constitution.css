@@ -47,6 +47,10 @@ leaf description {
 	margin: .5rem;
 	padding: .1rem;
 }
+leaf description.none {
+	border: none;
+	padding: 0;
+}
 
 leaf forbar {
 	display: block;

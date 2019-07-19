@@ -15,7 +15,7 @@
 - [ ] delete org
 - [ ] remove org users
 - [ ] user, org, const, law, ballot 404
-- [ ] delete law
+* [x] delete law
 - [ ] delete ballot
 - [ ] enable edit of org name
 - [ ] enable edit of const title, description

@@ -178,8 +178,11 @@ LIMIT 1" law-id])))
         law-id    (first (vals (first result)))]
     law-id))
 
+(defn law-del! [law-id]
+  (jdbc/delete! db-spec :law ["law_id = ?" law-id]))
+
 (defn law-basic-info [law-id]
-  (first (jdbc/query db-spec ["SELECT title, body FROM law WHERE law_id = ?" law-id])))
+  (first (jdbc/query db-spec ["SELECT title, body, con_id FROM law WHERE law_id = ?" law-id])))
 
 (defn law-info [law-id]
   (first (jdbc/query db-spec ["SELECT law.law_id, law.title title, body, parent_id, law.con_id, con.title con_title

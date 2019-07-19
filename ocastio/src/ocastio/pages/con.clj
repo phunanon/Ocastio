@@ -56,7 +56,6 @@
 
 (defn render-leaf [{:keys [approval won? law_id bal-id title body]} by-parent parent-active?]
   (let [active?      (and parent-active? won?)
-        body         (if (= body "") "No body." body)
         approval     (if approval (* approval 100) 0)]
   [:leaf
     (vote-bar approval)
@@ -69,7 +68,7 @@
           (format "%.2f%%" approval)
           " " [:a {:href (str "/ballot/" bal-id)} "🔗"]]
         "unvoted")]
-    [:description body]
+    [(if (= body "") :description.none :description) body]
     (map #(render-leaf % by-parent active?)
           (by-parent law_id))]))
 

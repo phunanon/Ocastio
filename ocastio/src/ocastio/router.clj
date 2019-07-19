@@ -22,6 +22,9 @@
   (db/org-admin? org-id email))
 (defn con-exec? [{:keys [con-id]} {:keys [email]}]
   (db/con-exec? con-id email))
+(defn law-exec? [{:keys [law-id]} {:keys [email]}]
+  (let [{:keys [con_id]} (db/law-basic-info law-id)]
+    (db/con-exec? con_id email)))
 
 (def pages {
             ;maker          auth func
@@ -68,22 +71,21 @@
   :con-mem  [con/add-mem!   signed?]
   :con-del  [con/del!       con-exec?]
   :law-new  [law/new!       con-exec?]
+  :law-del  [law/del!       law-exec?]
   :bal-new  [vot/new-bal!   con-exec?]
   :bal-del  [vot/del!       signed?]
   :vote     [vot/vote!      signed?]
 })
 
 ;TODO: make :sess optional for doer's
-(defn do-action [request what]
+(defn do-action [{:keys [params session referer] :as request} what]
   "Returns {:redir location, :sess newSession}"
-  (let [para       (:params request)
-        sess       (:session request)
-        entry      (what posts)
+  (let [entry      (what posts)
         doer       (nth entry 0)
-        authed?    ((entry 1) para sess)]
+        authed?    ((entry 1) params session)]
     (if authed?
       (doer request)
-      {:redir (:referer request) :sess sess})))
+      {:redir referer :sess session})))
 
 (defn post [request what]
   (if (some? (what posts))
