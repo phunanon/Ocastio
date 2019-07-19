@@ -60,7 +60,7 @@
      [:hours      "smallint"]
      [:preresult  "boolean"] ;show early results
      [:majority   "tinyint"] ;winning majority percentage
-     [:range      "tinyint"] ;score range, 0-range
+     [:sco_range  "tinyint"] ;score range, 0-range
      org-fk user-fk method-fk])
   (jdbc/create-table-ddl :bal_opt
     [[:opt_id pk]
@@ -108,6 +108,7 @@
 
 ;ALTER TABLE ballot
 ;ADD name varchar(255);
+;ALTER TABLE ballot RENAME COLUMN range TO sco_range;
 
 ;SELECT DISTINCT constraint_name FROM information_schema.constraints 
 ;WHERE table_name='LAW' AND column_list='CON_ID'

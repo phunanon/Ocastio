@@ -48,18 +48,20 @@
 - [x] list orgs (with num mems)
 - [x] new constitution
 - [x] add members to org, as admin
-* [x] view org (num members, link constitutions, link polls)
-* [x] new law
-* [x] view constitution (num affected members, orgs, link laws, link ballots)
-* [x] new poll
-* [x] Majority Approvals poll
-* [x] Score Approvals poll
-* [x] poll results
-- [ ] add member org to const
-- [ ] add exec org to const
+- [x] view org (num members, link constitutions, link polls)
+- [x] new law
+- [x] view constitution (num affected members, orgs, link laws, link ballots)
+- [x] new poll
+- [x] Majority Approvals poll
+- [x] Score Approvals poll
+- [x] poll results
+- [x] add member org to const
+- [x] add exec org to const
+- [x] extrapolate latest ballot results per law
+- [ ] quorum
 - [ ] law, ballot dates
 - [ ] form errors
 - [ ] leverage defn-
 - [ ] leverage clj-time
 - [ ] cache control
-- [ ] 
+- [ ]

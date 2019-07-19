@@ -162,6 +162,15 @@ WHERE org2user.is_admin AND org2con.is_exec
 (defn con-laws [con-id]
   (jdbc/query db-spec ["SELECT law.law_id, title, body, parent_id FROM law WHERE con_id = ?" con-id]))
 
+(defn law-latest-ballot [law-id]
+  (fvf (jdbc/query db-spec ["
+SELECT ballot.ballot_id FROM BALLOT
+JOIN bal_opt ON bal_opt.ballot_id = ballot.ballot_id
+WHERE DateAdd(hour, hours, start) < GetDate()
+  AND bal_opt.law_id = ?
+ORDER BY DateAdd(hour, hours, start)
+LIMIT 1" law-id])))
+
 (defn law-new! [con-id parent-id email title body]
   (let [user-id   (email->id email)
         parent-id (if (= parent-id 0) nil parent-id)
@@ -204,7 +213,7 @@ WHERE law.law_id = ?" law-id])))
 (defn poll? [ballot-id] (db-some? "ballot" "org_id" "ballot_id" ballot-id))
 
 (defn ballot-infos [org-id]
-  (jdbc/query db-spec ["SELECT ballot.ballot_id, title, ballot.desc, method.method_id, ballot.num_win, start, hours, COUNT(opt_id) num_opt, majority, range, preresult
+  (jdbc/query db-spec ["SELECT ballot.ballot_id, title, ballot.desc, method.method_id, ballot.num_win, start, hours, COUNT(opt_id) num_opt, majority, sco_range, preresult
 FROM ballot
 JOIN bal_opt ON bal_opt.ballot_id = ballot.ballot_id
 JOIN method ON method.method_id = ballot.method_id
@@ -213,7 +222,7 @@ GROUP BY ballot.ballot_id
 ORDER BY count(opt_id) DESC" org-id]))
 
 (defn ballot-info [ballot-id]
-  (first (jdbc/query db-spec ["SELECT ballot.ballot_id, org_id, title, ballot.desc, method.method_id, ballot.num_win, start, hours, preresult, majority, range, COUNT(opt_id) num_opt
+  (first (jdbc/query db-spec ["SELECT ballot.ballot_id, org_id, title, ballot.desc, method.method_id, ballot.num_win, start, hours, preresult, majority, sco_range, COUNT(opt_id) num_opt
 FROM ballot
 JOIN method ON method.method_id = ballot.method_id
 JOIN bal_opt ON bal_opt.ballot_id = ballot.ballot_id
@@ -228,7 +237,7 @@ JOIN law ON law.law_id = bal_opt.law_id
 WHERE ballot_id = ?" ballot-id]))
 
 (defn con-ballots [con-id]
-  (jdbc/query db-spec ["SELECT ballot.ballot_id, ballot.title, method.method_id, ballot.num_win, COUNT(opt_id) num_opt, start, hours
+  (jdbc/query db-spec ["SELECT ballot.ballot_id, ballot.title, method.method_id, ballot.num_win, COUNT(opt_id) num_opt, start, hours, sco_range, majority
 FROM ballot
 JOIN method   ON method.method_id = ballot.method_id
 JOIN bal_opt  ON bal_opt.ballot_id  = ballot.ballot_id

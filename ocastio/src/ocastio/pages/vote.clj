@@ -77,7 +77,7 @@
              :as request} compose poll?]
   (let [ballot-id (Integer. ballot-id)
 
-        {:keys [title org_id method_id desc hours start num_win majority range preresult] :as info}
+        {:keys [title org_id method_id desc hours start sco_range preresult] :as info}
           (db/ballot-info ballot-id)
 
         org-name  (:name (db/org-basic-info org_id))
@@ -107,7 +107,6 @@
       [:p (v/make-method-info info)]
       [:p "From " [:b (v/format-inst start)] " for " [:b hours "h"] "."]
       [:quote desc]
-
       (let [{:keys [complete? ongoing? future?]}
               {(keyword (str (name state) "?")) true}]
         [:div
@@ -123,13 +122,12 @@
               (if (and ongoing? can-vote?)
                 [:div
                   [:p.admin "You are eligible to vote."]
-                  (make-option-form options ballot-id method_id range)])])
+                  (make-option-form options ballot-id method_id sco_range)])])
           (if (and (not future?) results?)
             [:div
               [:h3 "Results"]
               [:p num-votes " " (v/plu "vote" num-votes) " total."]
-              (r/html ballot-id method_id num_win range majority)])])
-
+              (r/ballot-results-html ballot-id)])])
       (if (if poll? admin? exec?)
         (v/make-del-button (str "/bal/del/" ballot-id) type)))))
 
@@ -153,7 +151,7 @@
           [:span "%"]]
         [:p#range.inline
           [:span "Score range between 0 and "]
-          [:input#range {:name "range" :type "number" :value 5 :min 2 :max 16}]]
+          [:input#range {:name "sco_range" :type "number" :value 5 :min 2 :max 16}]]
         [:p "Dates and times are UTC."]
         [:p.inline "Starting at"
           [:input {:type "date" :name "date" :value date-now}]
@@ -173,7 +171,7 @@
 
 
 (defn process-new!-post
-  [{:keys [title desc date time days hours method_id num_win range majority preresult]}
+  [{:keys [title desc date time days hours method_id num_win sco_range majority preresult]}
    {email :email}]
   "Browser [para sess] -> {:setting val}"
   { :title      title
@@ -181,7 +179,7 @@
     :user_id    (db/email->id email)
     :method_id  (Integer. method_id)
     :num_win    (Integer. num_win)
-    :range      (Integer. range)
+    :sco_range  (Integer. sco_range)
     :majority   (Integer. majority)
     :start      (LocalDateTime/parse (str date " " time) v/date-format)
     :hours      (+ (Integer. hours) (* (Integer. days) 24))

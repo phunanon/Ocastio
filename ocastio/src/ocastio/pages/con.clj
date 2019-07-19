@@ -1,5 +1,6 @@
 (ns ocastio.pages.con
   (:require
+    [ocastio.html.result :as r]
     [ocastio.views :as v]
     [ocastio.db :as db]
     [clojure.string :as str]
@@ -53,31 +54,39 @@
 (defn vote-bar [vote%]
   [:votebar [:forbar {:style (str "width: " vote% "%")}]])
 
-(defn render-leaf [leaf by-parent parent-in]
-    (let [vote%        (:vote% leaf)
-          vote-in      (> vote% 50)
-          can-in       (and parent-in vote-in)
-          body         (:body leaf)
-          body         (if (= body "") "No body." body)]
-    [:leaf  (vote-bar vote%)
-      [:a {:href (str "/law/" (:law_id leaf))}
-        [:leaftitle {:class (if can-in "in" "out")} (:title leaf)]]
-      [:leafvotes {:class (if vote-in "in" "out")} (format "%.2f%%" vote%)]
-      [:description body]
-      (map #(render-leaf % by-parent can-in) (by-parent (:law_id leaf)))]))
+(defn render-leaf [{:keys [approval won? law_id bal-id title body]} by-parent parent-active?]
+  (let [active?      (and parent-active? won?)
+        body         (if (= body "") "No body." body)
+        approval     (if approval (* approval 100) 0)]
+  [:leaf
+    (vote-bar approval)
+    [:a {:href (str "/law/" law_id)}
+      [:leaftitle {:class (if active? "in" "out")} title]]
+    [:leafvotes
+      {:class (if won? "in" "out")}
+      (if bal-id
+        [:span
+          (format "%.2f%%" approval)
+          " " [:a {:href (str "/ballot/" bal-id)} "🔗"]]
+        "unvoted")]
+    [:description body]
+    (map #(render-leaf % by-parent active?)
+          (by-parent law_id))]))
 
 (defn render-tree [by-parent]
-  (map #(render-leaf % by-parent {:vote% 100}) (by-parent 0)))
+  (map #(render-leaf % by-parent true) (by-parent 0)))
+
+(defn assoc-result [{:keys [law_id] :as law}]
+  (into law
+    (select-keys (r/law-result law_id)
+      [:bal-id :approval :won?])))
 
 (defn render-laws [con-id]
-  (let [all-laws (map #(assoc % :vote% (rand 100)) (db/con-laws con-id))
+  (let [all-laws (db/con-laws con-id)
+        all-laws (map assoc-result all-laws)
         by-parent (group-by :parent_id all-laws)
         by-parent (set/rename-keys by-parent {nil 0})]
    [:tree (render-tree by-parent)]))
-
-
-(defn render-ballots [con-id]
-  (map #(v/make-ballot-link % "ballot") ))
 
 
 (defn make-org-link [{:keys [org_id name is_exec]}]
@@ -124,7 +133,6 @@
       (if (empty? ballots) [:p "No ballots yet."])
       (v/make-ballot-links ballots "ballot")
     [:h3 "Laws"]
-      [:p "Note: vote percentages are currently randomised, but in the future will be extrapolated from the latest ballots."]
       (if is-exec
         [:p.admin [:a {:href (str "/law/new/" con-id "/0")} "Compose a new law"]])
       ;[:ul (map v/make-law-link laws)]

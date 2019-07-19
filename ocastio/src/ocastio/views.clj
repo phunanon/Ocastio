@@ -70,13 +70,13 @@
       [:body (make-header request) body]))
 
 
-(defn make-method-info [{:keys [method_id num_win num_opt majority range preresult]}]
+(defn make-method-info [{:keys [method_id num_win num_opt majority sco_range preresult]}]
   (let [{name :name is-num-win :num_win is-score :is_score}
           (db/method-info method_id)
         facts [(if is-num-win
                  (str num_win "/" num_opt " win")
                  (str majority "% win"))
-               (if is-score (str "0-" range " range"))
+               (if is-score (str "0-" sco_range " range"))
                (if preresult "early results")]
         facts (filter some? facts)
         facts (str/join ", " facts)]
@@ -102,7 +102,6 @@
         [:h4 (str/capitalize (name state))]
         (map #(make-ballot-link % type) ballots)])
     triage)))
-  ;(map #(make-ballot-link % type) ballots))
 
 (defn make-law-link [{:keys [law_id title]}]
   [:li
