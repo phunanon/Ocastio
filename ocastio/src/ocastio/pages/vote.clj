@@ -21,18 +21,41 @@
     (map #(vector (extract-int (% 0)) (% 1)))
     (into {})))
 
+(defn test-vote [bal-info user-id]
+  (let [{:keys [ballot_id start hours org_id]}
+          bal-info
+        state (v/ballot-state start hours)]
+    (if (= state :ongoing)
+      (if
+        (if org_id
+          (db/can-poll-vote? org_id user-id)
+          (db/can-ballot-vote? ballot_id user-id))
+        :authed
+        :noauth)
+      state)))
 
-; TODO check are in org, org can vote, options are of ballot, values are sane
-(defn vote! [request]
-  (let [para      (:params request)
-        sess      (:session request)
-        ballot-id (:ballot_id para)
-        user-id   (db/email->id (:email sess))
-        method-id (db/ballot-basic-info ballot-id)
-        poll?     (db/poll? ballot-id)
-        type      (if poll? "poll" "ballot")]
-    (db/vote-new! user-id ballot-id (select-opts para))
-    {:redir (str "/" type "/" ballot-id) :sess sess}))
+(defn normalise-vals [hmap sco-range]
+  (zipmap
+    (map key hmap)
+    (map #(if (> % sco-range) sco-range %)
+         (map val hmap))))
+
+; TODO check options are of ballot
+(defn vote! [{{:keys [ballot_id] :as para} :params
+              {:keys [email] :as sess}     :session}]
+  (let [user-id   (db/email->id (:email sess))
+        is-poll   (db/poll? ballot_id)
+        type      (if is-poll "poll" "ballot")
+        {:keys [method_id sco_range] :as bal-info}
+          (db/ballot-basic-info ballot_id)
+        test-vote (test-vote bal-info user-id)
+        opts      (select-opts para)
+        {:keys [is_score]}
+          (db/method-info method_id)
+        opts      (if is_score (normalise-vals opts sco_range) opts)]
+    (if (= test-vote :authed)
+      (db/vote-new! user-id ballot_id opts))
+    {:redir (str "/" type "/" ballot_id) :sess sess}))
 
 (defn make-check-input [{:keys [opt_id text] :as option}]
   (def opt (str "opt" opt_id))

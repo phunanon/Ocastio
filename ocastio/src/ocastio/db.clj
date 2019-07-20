@@ -277,7 +277,8 @@ LIMIT 1" user-id ballot-id]))))
     false
     (not-empty (jdbc/query db-spec ["SELECT * FROM ballot 
 JOIN org2user ON ballot.org_id = org2user.org_id
-WHERE ballot.org_id = ? AND org2user.user_id = ?" org-id user-id]))))
+WHERE ballot.org_id = ? AND org2user.user_id = ?
+LIMIT 1" org-id user-id]))))
 
 (defn vote-new! [user-id ballot-id choices]
   "Inserts choices {opt-num opt-val,} replacing existing user votes"
