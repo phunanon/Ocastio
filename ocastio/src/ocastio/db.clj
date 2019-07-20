@@ -212,6 +212,9 @@ WHERE law.law_id = ?" law-id])))
 (defn ballot-basic-info [ballot-id]
   (first (jdbc/query db-spec ["SELECT * FROM ballot WHERE ballot_id = ?" ballot-id])))
 
+(defn ballot-exists? [ballot-id]
+  (db-exists? "ballot" "ballot_id" ballot-id))
+
 ;TODO: use as confirmation; memoize
 (defn poll? [ballot-id] (db-some? "ballot" "org_id" "ballot_id" ballot-id))
 

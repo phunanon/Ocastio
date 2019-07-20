@@ -71,65 +71,65 @@
 (defn make-option-info [options]
   [:ol (map #(vector :li (v/make-option-text %)) options)])
 
-;TODO: Ensure ballot-id is sane
 (defn page [{{ballot-id :ballot_id} :params
-             {:keys [email]}        :session
-             :as request} compose poll?]
+             {:keys [email]}        :session} compose poll?]
   (let [ballot-id (Integer. ballot-id)
+        exists    (db/ballot-exists? ballot-id)]
+    (if (not exists)
+      (compose "Ballot doesn't exist" nil [:h2 "Ballot doesn't exist."])
+      (let [{:keys [title org_id method_id desc hours start sco_range preresult] :as info}
+            (db/ballot-info ballot-id)
 
-        {:keys [title org_id method_id desc hours start sco_range preresult] :as info}
-          (db/ballot-info ballot-id)
+          org-name  (:name (db/org-basic-info org_id))
+          options   (if poll? (db/bal-pol-options ballot-id) (db/bal-law-options ballot-id))
+          num-votes (db/ballot-num-votes ballot-id)
 
-        org-name  (:name (db/org-basic-info org_id))
-        options   (if poll? (db/bal-pol-options ballot-id) (db/bal-law-options ballot-id))
-        num-votes (db/ballot-num-votes ballot-id)
+          user-id   (db/email->id email)
+          can-vote? (if poll?
+            (db/can-poll-vote? org_id user-id)
+            (db/can-ballot-vote? ballot-id user-id))
 
-        user-id   (db/email->id email)
-        can-vote? (if poll?
-          (db/can-poll-vote? org_id user-id)
-          (db/can-ballot-vote? ballot-id user-id))
+          con-id    (db/bal->con ballot-id)
+          con-name  (:title (db/con-info con-id))
 
-        con-id    (db/bal->con ballot-id)
-        con-name  (:title (db/con-info con-id))
+          admin?    (db/org-admin? org_id email)
+          exec?     (db/con-exec? con-id email)
+          state     (v/ballot-state start hours)
+          results?  (or (= state :complete) preresult)
 
-        admin?    (db/org-admin? org_id email)
-        exec?     (db/con-exec? con-id email)
-        state     (v/ballot-state start hours)
-        results?  (or (= state :complete) preresult)
-
-        Type      (if poll? "Poll" "Ballot")
-        type      (str/lower-case Type)]
-    (compose (str title " | " Type) nil
-      (if poll?
-        [:navinfo "Conducted by "  [:a {:href (str "/org/" org_id)} org-name] "."]
-        [:navinfo "Conducted for " [:a {:href (str "/con/" con-id)} con-name] "."])
-      [:h2 title [:grey " | " Type]]
-      [:p (v/make-method-info info)]
-      [:p "From " [:b (v/format-inst start)] " for " [:b hours "h"] "."]
-      [:quote desc]
-      (let [{:keys [complete? ongoing? future?]}
-              {(keyword (str (name state) "?")) true}]
-        [:div
-          (if (not complete?)
-            [:div
-              (if (or can-vote? future?) [:h3 "Options"])
-              (if (and future? can-vote?)
-                [:div
-                  [:p.admin "You will be eligible to vote."]
-                  (make-option-info options)])
-              (if (and future? (not can-vote?))
-                (make-option-info options))
-              (if (and ongoing? can-vote?)
-                [:div
-                  [:p.admin "You are eligible to vote."]
-                  (make-option-form options ballot-id method_id sco_range)])])
-          (if (and (not future?) results?)
-            [:div
-              [:h3 "Results"]
-              [:p num-votes " " (v/plu "vote" num-votes) " total."]
-              (r/ballot-results-html ballot-id)])])
-      (if (if poll? admin? exec?)
-        (v/make-del-button (str "/bal/del/" ballot-id) type)))))
+          Type      (if poll? "Poll" "Ballot")
+          type      (str/lower-case Type)]
+      (compose (str title " | " Type) nil
+        (if poll?
+          [:navinfo "Conducted by "  [:a {:href (str "/org/" org_id)} org-name] "."]
+          [:navinfo "Conducted for " [:a {:href (str "/con/" con-id)} con-name] "."])
+        [:h2 title [:grey " | " Type]]
+        [:p (v/make-method-info info)]
+        [:p "From " [:b (v/format-inst start)] " for " [:b hours "h"] "."]
+        [:quote desc]
+        (let [{:keys [complete? ongoing? future?]}
+                {(keyword (str (name state) "?")) true}]
+          [:div
+            (if (not complete?)
+              [:div
+                (if (or can-vote? future?) [:h3 "Options"])
+                (if (and future? can-vote?)
+                  [:div
+                    [:p.admin "You will be eligible to vote."]
+                    (make-option-info options)])
+                (if (and future? (not can-vote?))
+                  (make-option-info options))
+                (if (and ongoing? can-vote?)
+                  [:div
+                    [:p.admin "You are eligible to vote."]
+                    (make-option-form options ballot-id method_id sco_range)])])
+            (if (and (not future?) results?)
+              [:div
+                [:h3 "Results"]
+                [:p num-votes " " (v/plu "vote" num-votes) " total."]
+                (r/ballot-results-html ballot-id)])])
+        (if (if poll? admin? exec?)
+          (v/make-del-button (str "/bal/del/" ballot-id) type)))))))
 
 
 (defn make-form-new [type Type id option-form]
