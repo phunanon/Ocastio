@@ -67,8 +67,8 @@
         [:span
           (format "%.2f%%" approval)
           " " [:a {:href (str "/ballot/" bal-id)} "🔗"]]
-        "unvoted")]
-    [(if (= body "") :description.none :description) body]
+        "nil")]
+    [(if (= body "") :description.none :description) [:pre body]]
     (map #(render-leaf % by-parent active?)
           (by-parent law_id))]))
 

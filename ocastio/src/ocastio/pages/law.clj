@@ -20,7 +20,7 @@
     [:navinfo "Part of " [:a {:href (str "/con/" con_id)} con_title] "."
       (if parent_id [:span " A child of " [:a {:href (str "/law/" parent_id)} parent-name] "."])]
     [:h2 title [:grey " | Law"]]
-    [:quote body]
+    [:quote [:pre body]]
   (if (not-empty children) [:h3 "Children"])
   (if is-exec
     [:p.admin [:a {:href (str "/law/new/" con_id "/" law-id)} "Create a child law"]])
