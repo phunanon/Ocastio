@@ -15,7 +15,8 @@
         body        (if (= body "") "No body." body)
         parent-name (:title (db/law-info parent_id))
         children    (db/law-children law-id)
-        is-exec     (db/con-exec? con_id email)]
+        is-exec     (db/con-exec? con_id email)
+        btn-new     #(vector :a {:href (str "/law/new/" con_id "/" %)} %2)]
   (compose title nil
     [:navinfo "Part of " [:a {:href (str "/con/" con_id)} con_title] "."
       (if parent_id [:span " A child of " [:a {:href (str "/law/" parent_id)} parent-name] "."])]
@@ -23,7 +24,9 @@
     [:quote [:pre body]]
   (if (not-empty children) [:h3 "Children"])
   (if is-exec
-    [:p.admin [:a {:href (str "/law/new/" con_id "/" law-id)} "Create a child law"]])
+    [:p.admin
+      (btn-new law-id "Create a child law") " or "
+      (btn-new (if parent_id parent_id "0") "a sibling law")])
   (if is-exec
     (v/make-del-button (str "/law/del/" law-id) "law"))
   [:ul (map v/make-law-link children)])))
