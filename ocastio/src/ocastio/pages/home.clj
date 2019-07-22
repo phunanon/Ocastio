@@ -18,7 +18,7 @@
 (defn gen-stats []
   (map #(vector :stat [:b (% 1)] " " (% 0)) stats))
 
-(def early [["Eodus" "a test micronation." "/"]])
+(def early [["Eodus" "a micronation employing direct-democracy." "https://t.me/Eodusians"]])
 
 (defn page [request compose]
   (compose "Home" nil
@@ -52,6 +52,6 @@
     [:p "This enables, for example, your Organisation to adopt the pre-written Universal Declaration of Human Rights 'Constitution'. Or, for multi-nation organisations to compose Constitutions for all members - with a body of executives. 'Organisations' don't have to be micronations - you can create specific Organisations for your different government and civil organs."]
     [:p"As Ocastio leaves the legal arbitration to you, Constitutions provide a unique feature: marking child Laws as inactive if the parental Laws have been disapproved through ballot. This allows you to have an automatic and flexible legal history."]
     [:h3 "Technical Info"]
-    [:p "Ocastio is currently hosted on a DigitalOcean single-core 1GB Droplet. The application runs on the JVM (Java Virtual Machine), and is written in Clojure - a modern functional-paradigm programming language. The website is open source and can be found on " [:a {:href "https://github.com/phunanon/Ocastio"} "Github"] "."]
+    [:p "Ocastio is currently hosted on a DigitalOcean 2.2GHz 1GB Droplet. The application runs on the JVM (Java Virtual Machine), and is written in Clojure - a modern functional-paradigm programming language. The website is open source and can be found on " [:a {:href "https://github.com/phunanon/Ocastio"} "Github"] "."]
     [:h4 "About the author"]
     [:p "I'm a British professional C# software engineer and undergraduate Computing Science BSc student. I have operated two websites in the past, both written in PHP. A micronational website at " [:a {:href "http://archive.is/LyQGZ"} "eodus.org"] " (defunct since 2016), which pioneered " [:a {:href "https://web.archive.org/web/20160722090243/https://eodus.org/TRS"} "online direct democracy"] " with over 500 votes cast. And an online voting platform (" [:a {:href "https://phunanon.github.io/portfolio/img/Acastio_low.webm"} "demo video"] ") which was a prototype to Ocastio."]))

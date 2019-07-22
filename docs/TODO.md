@@ -13,26 +13,27 @@
 
 - [ ] delete account
 - [ ] delete org
-- [ ] remove org users
+- [x] remove org users
 - [ ] user, org, const, law, ballot 404
-* [x] delete law
-- [ ] delete ballot
-- [ ] enable edit of org name
+- [x] delete law
+- [x] delete ballot
+- [ ] enable edit of org name, desc
 - [ ] enable edit of const title, description
 - [ ] "your organisations"
-- [ ] simplify router/post and router/page
-- [ ] simplify get-sess/get-param between pages
+- [ ] "your ballots to vote on"
+- [x] simplify router/post and router/page
+- [x] simplify get-sess/get-param between pages
 - [ ] leverage TTL cache
-- [ ] check if admin for operations asap (perhaps an auth func dict in router)
+- [x] check if admin for operations asap (perhaps an auth func dict in router)
 - [ ] check if org/const/poll exists asap (perhaps a 404 func dict in router)
-- [ ] people -> person
-- [ ] v/ user/org/const links
-- [ ] homepage statistics
-- [ ] design house style
+- [x] people -> person
+- [x] v/ user/org/const links
+- [x] homepage statistics
+- [x] design house style
 - [ ] cryptographically secure salt
-- [ ] leverage Clojure destructuring appropriately
-- [ ] choice to always show ballot results
-- [ ] choose score precision
+- [x] leverage Clojure destructuring appropriately
+- [x] choice to always show ballot results
+- [x] choose score precision
 - [ ] https://github.com/yogthos/lein-asset-minifier
 - [ ] Split db into separate namespaces
 - [ ] Use -? only for functions; use is- for variables
@@ -64,4 +65,4 @@
 - [ ] leverage defn-
 - [ ] leverage clj-time
 - [ ] cache control
-- [ ]
+- [ ] use cryptographic signature for votes, not referential link
