@@ -53,11 +53,14 @@
   (jdbc/update! db-spec :user {:contact contact} ["email = ?" email]))
 
 (defn contact->id [contact]
-  (fvf (jdbc/query db-spec ["SELECT user_id FROM user WHERE contact = ?" contact])))
+  (fvf (jdbc/query db-spec [(str "SELECT user_id FROM user WHERE contact = '" contact "'")])))
 
 
 (defn add-to-org! [org-id user-id is-admin]
   (jdbc/insert! db-spec :org2user {:org_id org-id :user_id user-id :is_admin is-admin}))
+
+(defn rem-from-org! [org-id user-id]
+  (jdbc/delete! db-spec :org2user ["org_id = ? AND user_id = ?" org-id user-id]))
 
 (defn org-new! [email name desc contact]
   (let [user-id (email->id email)

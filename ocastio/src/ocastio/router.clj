@@ -65,7 +65,7 @@
   :sign     [sig/sign!      no-auth]
   :signout  [sig/signout    no-auth]
   :org-new  [org/new!       signed?]
-  :org-mem  [org/add-mems!  org-admin?]
+  :org-mem  [org/mod-mems!  org-admin?]
   :pol-new  [vot/new-pol!   org-admin?]
   :con-new  [con/new!       org-admin?]
   :con-mem  [con/add-mem!   signed?]

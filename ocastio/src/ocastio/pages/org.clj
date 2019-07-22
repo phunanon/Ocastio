@@ -76,11 +76,12 @@
     (compose "Members management" nil
       [:p.admin "Administrative section for " (v/org-link org-id name) "."]
       [:h2 "Members Management"]
-      [:p "Add members by providing their emails below (one per line). Add ! at the start of the email to make them admins."]
-        [:form {:action (str "/org/add-mem/" org-id) :method "POST"}
+      [:p "Provide user emails below, one per line. Add ! at the start of emails to make them admins."]
+        [:form {:action (str "/org/mod-mem/" org-id) :method "POST"}
           (util/anti-forgery-field)
           [:textarea {:name "emails"}]
-          [:input {:type "submit" :value "Add members"}]]
+          [:input {:type "submit" :name "doadd" :value "Add members"}]
+          [:input {:type "submit" :name "dorem" :value "Remove members"}]]
       [:ul
         (map str (db/org-mems org-id))])))
 
@@ -101,15 +102,18 @@
     (do (db/org-new! email name desc contact)
         {:redir "/orgs" :sess sess})))
 
-(defn add-mems! [{{:keys [org_id emails]}  :params
-                  {:keys [email] :as sess} :session}]
-  (let [org-id    (Integer. org_id)
-        new-mems  (vec (set (split-by-whitespace emails)))
+(defn mod-mems! [{{:keys [org-id emails doadd dorem]} :params
+                  {:keys [email] :as sess}            :session}]
+  (let [org-id    (Integer. org-id)
+        mems      (vec (set (split-by-whitespace emails)))
         admin?    #(str/starts-with? % "!")
-        new-mems  (map #(hash-map :admin? (admin? %) :email (str/replace % #"!" "")) new-mems)
-        new-mems  (filter #(db/email-exists? (:email %)) new-mems)
-        new-mems  (map #(assoc % :user-id (db/email->id (:email %))) new-mems) ;TODO use nil from email->id
-        new-mems  (filter #(not (db/user-in-org? org-id (:user-id %))) new-mems)]
-    (doseq [{:keys [user-id admin?]} new-mems]
-      (db/add-to-org! org-id user-id admin?))
-    {:redir (str "/org/" org-id) :sess sess}))
+        mems      (map #(hash-map :admin? (admin? %) :email (str/replace % #"!" "")) mems)
+        mems      (map #(assoc % :user-id (db/email->id (:email %))) mems)
+        mems      (filter #(some? (:user-id %)) mems)
+        in-org?   #(db/user-in-org? org-id (:user-id %))
+        mems      (filter (if dorem in-org? (complement in-org?)) mems)]
+    (doseq [{:keys [user-id admin?]} mems]
+      (if dorem
+        (db/rem-from-org! org-id user-id)
+        (db/add-to-org! org-id user-id admin?))))
+  {:redir (str "/org/mems/" org-id) :sess sess})
