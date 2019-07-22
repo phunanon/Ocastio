@@ -76,6 +76,11 @@ input:checked + label {
 	width: 4rem;
 }
 
+textarea.big {
+	width: 100%;
+	height: 10rem;
+}
+
 .org stat {
 	display: inline-block;
 	width: 3rem;
