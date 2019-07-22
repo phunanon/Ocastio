@@ -3,7 +3,7 @@
     [ocastio.db :as db]
     [clojure.string :as str]
     [clj-time.core :as t]
-    [hiccup.page :as page]
+    [hiccup.page :as h]
     [ring.util.anti-forgery :as util])
   (:import (java.time Instant ZoneId LocalDateTime format.DateTimeFormatter)))  ;TODO phase-out in preference of clj-time
 
@@ -54,18 +54,18 @@
       (if email
         (nav-link "Sign out" (str "/signout?redir=" uri))
         (nav-link "Account" (str "/signin?redir=" uri)))]
-    (page/include-css "/css/page.css")
-    (page/include-css "/css/head.css")
+    (h/include-css "/css/page.css")
+    (h/include-css "/css/head.css")
     [:a {:href "/"} [:img {:src "/img/logo.svg"}]]])
 
 (defn compose-page [request title head & body]
-  (page/html5
+  (h/html5
     [:head
       [:title (str title " | Ocastio")]
       [:meta {:name "viewport" :content "width=device-width, initial-scale=1.0"}]
       [:link {:href "https://fonts.googleapis.com/css?family=Montserrat&display=swap" :rel "stylesheet"}]
       [:link {:rel "shortcut icon" :type "image/png" :href "/img/favicon.png"}]
-      (page/include-css "/css/house.css")
+      (h/include-css "/css/house.css")
       head]
       [:body (make-header request) body]))
 
@@ -76,7 +76,7 @@
         facts [(if is-num-win
                  (str num_win "/" num_opt " win")
                  (str majority "% win"))
-               (if is-score (str "0-" sco_range " range"))
+               (if is-score (str "0-" (dec sco_range) " range"))
                (if preresult "early results")]
         facts (filter some? facts)
         facts (str/join ", " facts)]
@@ -117,3 +117,7 @@
   (if (nil? text)
     [:span [:a {:href (str "/law/" law_id)} "🔗"] " " title]
     text))
+
+(defn valid-email? [email]
+  (def pattern #"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
+  (and (string? email) (re-matches pattern email)))
