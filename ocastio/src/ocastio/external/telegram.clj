@@ -1,14 +1,16 @@
 (ns ocastio.external.telegram
   (:require
-    [ocastio.db         :as db]
-    [ocastio.views      :as v]
-    [ocastio.pages.vote :as vote]
+    [ocastio.db          :as db]
+    [ocastio.views       :as v]
+    [ocastio.pages.vote  :as vote]
     [ocastio.html.result :as r]
-    [morse.api          :as t]
-    [morse.handlers     :as h]
-    [morse.polling      :as p]
-    [clojure.string     :as str]
-    [clojure.edn        :as edn]
+    [clj-time.format     :as f]
+    [clj-time.coerce     :as cljt]
+    [morse.api           :as t]
+    [morse.handlers      :as h]
+    [morse.polling       :as p]
+    [clojure.string      :as str]
+    [clojure.edn         :as edn]
     [clojure.core.async :refer [go <!]]))
 
 (def token (slurp "telegram.tkn"))
@@ -49,10 +51,29 @@
   (send-tx! id "Type /help for options."))
 
 (defn cmd-help [{{:keys [id]} :chat}]
-  (send-md! id "Please register on [Ocastio](http://ocastio.uk) to use this bot."
+  (send-md! id "/register email password\n  create and link an Ocastio account"
               "\n/auth email password\n  link Telegram and Ocastio accounts"
               "\n/info ballot-id\n  ballot/poll info"
               "\n/vote ballot-id 0-n ...\n  vote on ballots/polls. 0-n is the range, with 0-1 for approval voting."))
+
+(defn cmd-register! [{{:keys [id]}       :chat
+                      {:keys [username]} :from
+                      text               :text}]
+  (let [text      (str/split text #" ")
+        email     (text 1)
+        pass      (text 2)
+        e-exists  (db/email-exists? email)
+        a-exists  (db/contact->id id)
+        e-invalid (not (v/valid-email? email))
+        p-invalid (< (count pass) 8)]
+    (if e-invalid (send-tx! id "Invalid email."))
+    (if p-invalid (send-tx! id "Password must be >7 characters."))
+    (if e-exists  (send-tx! id "Email already registered."))
+    (if a-exists  (send-tx! id "Email already authorised."))
+    (when (not (or e-invalid p-invalid e-exists a-exists))
+      (db/new-user! email pass)
+      (db/set-user-contact! email username)
+      (send-tx! id "Email registered and authenticated."))))
 
 (defn cmd-auth! [{{:keys [id]}       :chat
                   {:keys [username]} :from
@@ -67,15 +88,16 @@
       (send-tx! id "Unable to authenticate."))))
 
 (defn make-option-item [{:keys [state preresult]}
-                        {:keys [text title approval sum]}
+                        {:keys [text title approval sum won?]}
                         i]
   (let [can-show (or preresult (= state :complete))
         approval (int (* approval 100))
         approval (format " %,3d%%" approval)
         approval (if can-show approval "")
         sum      (format " %,3d" sum)
-        sum      (if can-show sum)]
-    (str "`" (inc i) "." approval sum " `" text title)))
+        sum      (if can-show sum)
+        emoji    (if won?  "✅" "  ")]
+    (str "`" (inc i) "." approval sum " " emoji " `" text title)))
 
 (defn cmd-info [{{:keys [id]} :chat
                  text         :text}]
@@ -85,13 +107,14 @@
       (let [{:keys [title desc start hours state
                     num-vote is-poll type Type] :as bal-info}
               (ballot-info ballot-id)
+            start-str   (f/unparse (f/formatter "yyyy-MM-dd HH:mm") (cljt/from-sql-date start))
             options     (bal-opts bal-info)
             options     (assoc-results options (r/ballot-results ballot-id))
             options     (map (partial make-option-item bal-info) options (range))
             options     (str/join "\n" options)
             method-info (str/join "" (drop 1 (v/make-method-info bal-info)))
-            info-msg    (str "(" (bal-link ballot-id (name state) type) ") "
-                             "*" Type " " ballot-id " | " num-vote " ✍️ | " title "*"
+            info-msg    (str "(" (bal-link ballot-id (name state) type) "; " start-str " for " hours "h)"
+                             "\n*" Type " " ballot-id " | " num-vote " ✍️ | " title "*"
                              "\n" method-info "\n_" desc "_\n" options)]
         (send-md! id info-msg))
       (send-tx! id "Ballot not found."))))
@@ -133,6 +156,7 @@
 (h/defhandler telegram-handler
   (h/command-fn "start" cmd-start)
   (h/command-fn "help"  cmd-help)
+  (h/command-fn "register" cmd-register!)
   (h/command-fn "auth"  cmd-auth!)
   (h/command-fn "info"  cmd-info)
   (h/command-fn "vote"  cmd-vote!))
