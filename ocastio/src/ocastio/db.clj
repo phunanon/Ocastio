@@ -175,9 +175,9 @@ WHERE org2user.is_admin AND org2con.is_exec
   (fvf (jdbc/query db-spec ["
 SELECT ballot.ballot_id FROM BALLOT
 JOIN bal_opt ON bal_opt.ballot_id = ballot.ballot_id
-WHERE DateAdd(hour, hours, start) < GetDate()
+WHERE DateAdd(hour, hours, start) < CURRENT_TIMESTAMP
   AND bal_opt.law_id = ?
-ORDER BY DateAdd(hour, hours, start)
+ORDER BY DateAdd(hour, hours, start) DESC
 LIMIT 1" law-id])))
 
 (defn law-new! [con-id parent-id email title body]
