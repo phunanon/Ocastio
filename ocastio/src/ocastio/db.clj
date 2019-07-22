@@ -49,6 +49,12 @@
         pass  (hashpass password salt)]
     (jdbc/insert! db-spec :user {:email email :pass pass :salt salt})))
 
+(defn set-user-contact! [email contact]
+  (jdbc/update! db-spec :user {:contact contact} ["email = ?" email]))
+
+(defn contact->id [contact]
+  (fvf (jdbc/query db-spec ["SELECT user_id FROM user WHERE contact = ?" contact])))
+
 
 (defn add-to-org! [org-id user-id is-admin]
   (jdbc/insert! db-spec :org2user {:org_id org-id :user_id user-id :is_admin is-admin}))

@@ -15,6 +15,7 @@
                  [pandect "0.6.1"]
                  [bk/ring-gzip "0.3.0"]
                  [clj-time "0.15.0"]
+                 [morse "0.4.3"]]
   :plugins [[lein-ring "0.12.5"]]
   :ring {:handler ocastio.handler/app}
   :profiles {

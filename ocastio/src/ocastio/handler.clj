@@ -4,6 +4,7 @@
   (:require
     [ocastio.router :as rou]
     [ocastio.db :as db]
+    [ocastio.external.telegram :as tele]
     [compojure.core :refer :all]
     [compojure.route :as route]
     [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
@@ -51,6 +52,8 @@
 (def app (-> app-routes
     (wrap-defaults site-defaults)
     (wrap-gzip)))
+
+(tele/start)
 
 ;lein ring server-headless
 ;java -cp ~/.m2/repository/com/h2database/h2/1.4.193/h2-1.4.193.jar org.h2.tools.Server

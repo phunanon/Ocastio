@@ -6,7 +6,7 @@
 
 (defn ballot-results [ballot-id]
   (let [{:keys [title org_id method_id desc hours start
-                num_win majority sco_range preresult] :as info}
+                num_win majority sco_range] :as info}
           (db/ballot-info ballot-id)
         {is-num-win :num_win is-score :is_score}
           (db/method-info method_id)
