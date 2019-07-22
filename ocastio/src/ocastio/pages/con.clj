@@ -80,10 +80,8 @@
     (select-keys (r/law-result law_id)
       [:bal-id :approval :won?])))
 
-(defn render-laws [con-id]
-  (let [all-laws (db/con-laws con-id)
-        all-laws (map assoc-result all-laws)
-        by-parent (group-by :parent_id all-laws)
+(defn render-laws [all-laws]
+  (let [by-parent (group-by :parent_id all-laws)
         by-parent (set/rename-keys by-parent {nil 0})]
    [:tree (render-tree by-parent)]))
 
@@ -108,7 +106,11 @@
         num-mem   (db/con-num-mem con-id)
         is-exec  (db/con-exec? con-id email)
 
-        ballots   (db/con-ballots con-id)]
+        ballots   (db/con-ballots con-id)
+        all-laws (db/con-laws con-id)
+        all-laws (map assoc-result all-laws)
+        num-act  (count (filter (comp true? :won?) all-laws))
+        num-ina  (- (count all-laws) num-act)]
     (compose title (page/include-css "/css/constitution.css")
     (if is-exec [:p.admin "You are an admin of an executive organisation."])
     [:h2 title [:grey " | Constitution"]]
@@ -134,8 +136,8 @@
     [:h3 "Laws"]
       (if is-exec
         [:p.admin [:a {:href (str "/law/new/" con-id "/0")} "Compose a new law"]])
-      ;[:ul (map v/make-law-link laws)]
-      (render-laws con-id)
+      [:p num-act " active, " num-ina " inactive."]
+      (render-laws all-laws)
     [:br]
     (if is-exec
       (v/make-del-button (str "/con/del/" con-id) "constitution")))))
