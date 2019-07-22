@@ -25,7 +25,7 @@
   (if (not-empty children) [:h3 "Children"])
   (if is-exec
     [:p.admin
-      (btn-new law-id "Create a child law") " or "
+      (btn-new law-id "Compose a child law") " or "
       (btn-new (if parent_id parent_id "0") "a sibling law")])
   (if is-exec
     (v/make-del-button (str "/law/del/" law-id) "law"))
@@ -46,9 +46,9 @@
           (if (= parent-id 0)
               "None (highest level of law)"
               [:a {:href (str "/law/" parent-id)} parent-name])]
-        [:input    {:type "text"    :name "title"   :placeholder "Title"}]
-        [:textarea {:type "text"    :name "body"    :placeholder "Law body"}]
-        [:input    {:type "submit"  :value "Create"}]])))
+        [:input        {:type "text" :name "title" :placeholder "Title"}]
+        [:textarea.big {:type "text" :name "body"  :placeholder "Law body"}]
+        [:input        {:type "submit"  :value "Compose"}]])))
 
 
 ; TODO check law doesn't already exist
