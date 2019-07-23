@@ -13,7 +13,7 @@
         majority    (/ majority 100)
         sco_range   (if is-score (float (dec sco_range)) 1.0)
         results     (db/vot-per-app ballot-id sco_range)
-        won?        #(if is-num-win (< %2 num_win) (>= (:approval %) majority))
+        won?        #(if is-num-win (< %2 num_win) (> (:approval %) majority))
         assoc-won   #(assoc % :won? (won? % %2))
         results     (map assoc-won (sort-by :approval > results) (range))]
     results))
