@@ -19,7 +19,7 @@
 (defn send-md! [id & body]
   (t/send-text token id {:parse_mode "Markdown"} (str/join "" body)))
 (defn bal-link [ballot-id title type]
-  (str "[" title "](http://ocastio.uk/" type "/" ballot-id ")"))
+  (str "[" title "](https://ocastio.uk/" type "/" ballot-id ")"))
 
 (defn parse-bal-cmd [text]
   (let [text      (str/split text #" ")
@@ -139,6 +139,7 @@
       (let [{:keys [title desc type is-poll start hours sco_range] :as bal-info}
               (ballot-info ballot-id)
             options     (map :opt_id (bal-opts bal-info))
+            text        (map #(or ({"Y" "1" "N" "0" "A" "abstain"} %) %) text)
             choices     (map edn/read-string (drop 2 text))
             is-abstain  (= (first choices) 'abstain)
             is-valid
@@ -169,7 +170,7 @@
 
 
 (defn simple-item [type {:keys [ballot_id title]}]
-  (str "[🔗](https://ocastio.uk/" type "/" ballot_id ") " title))
+  (str "[🔗 " ballot_id "](https://ocastio.uk/" type "/" ballot_id "): " title))
 
 (defn cmd-mine [{{:keys [id]}       :chat
                  {:keys [username]} :from
