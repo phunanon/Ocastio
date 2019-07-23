@@ -54,6 +54,7 @@
   (send-md! id "/register email password\n  create and link an Ocastio account"
               "\n/auth email password\n  link Telegram and Ocastio accounts"
               "\n/info ballot-id\n  ballot/poll info"
+              "\n/mine\n  see ballots/polls you can vote on"
               "\n/vote ballot-id 0-n ...\n  vote on ballots/polls. 0-n is the range, with 0-1 for approval voting."))
 
 (defn cmd-register! [{{:keys [id]}       :chat
@@ -153,12 +154,28 @@
           (send-tx! id "Invalid options.")))
       (send-tx! id "Ballot not found."))))
 
+
+(defn simple-item [type {:keys [ballot_id title]}]
+  (str "[🔗](https://ocastio.uk/" type "/" ballot_id ") " title))
+
+(defn cmd-mine [{{:keys [id]}       :chat
+                 {:keys [username]} :from
+                 text               :text}]
+  (let [user-id (db/contact->id username)
+        polls   (db/user-polls user-id)
+        ballots (db/user-ballots user-id)
+        do-list #(str/join "\n" (map (partial simple-item %) %2))]
+    (send-md! id
+      "*Polls*\n" (do-list "poll" polls)
+      "\n*Ballots*\n" (do-list "ballot" ballots))))
+
 (h/defhandler telegram-handler
   (h/command-fn "start" cmd-start)
   (h/command-fn "help"  cmd-help)
   (h/command-fn "register" cmd-register!)
   (h/command-fn "auth"  cmd-auth!)
   (h/command-fn "info"  cmd-info)
-  (h/command-fn "vote"  cmd-vote!))
+  (h/command-fn "vote"  cmd-vote!)
+  (h/command-fn "mine"  cmd-mine))
 
 (defn start [] (go (<! (p/start token telegram-handler))))

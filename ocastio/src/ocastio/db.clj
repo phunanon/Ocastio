@@ -289,6 +289,20 @@ JOIN org2user ON ballot.org_id = org2user.org_id
 WHERE ballot.org_id = ? AND org2user.user_id = ?
 LIMIT 1" org-id user-id]))))
 
+(defn user-polls [user-id]
+  (jdbc/query db-spec ["SELECT * FROM ballot 
+  JOIN org2user ON ballot.org_id = org2user.org_id
+  WHERE org2user.user_id = ?" user-id]))
+
+(defn user-ballots [user-id]
+  (jdbc/query db-spec ["SELECT DISTINCT ballot.ballot_id, ballot.title FROM ballot
+JOIN bal_opt ON bal_opt.ballot_id = ballot.ballot_id
+JOIN law ON law.law_id = bal_opt.law_id
+JOIN con ON con.con_id = law.con_id
+JOIN org2con ON org2con.con_id = con.con_id
+JOIN org2user ON org2con.org_id = org2user.org_id
+WHERE org2con.is_exec AND org2user.user_id = ?" user-id]))
+
 (defn vote-new! [user-id ballot-id choices]
   "Inserts choices {opt-num opt-val,} replacing existing user votes"
   ;Delete existing
