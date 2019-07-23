@@ -184,12 +184,12 @@
         [:p.inline "Starting at"
           [:input {:type "date" :name "date" :value date-now}]
           [:input {:type "time" :name "time" :value time-now}]]
-        [:p "Duration (days: 0-9, hours: 1-23):"]
+        [:p "Duration (days: 0-9, hours: 1-24):"]
         [:p.inline
           [:input {:type "range" :name "days"  :id "day"  :value 0 :min 0 :max 9}]
           [:span#days "0 days"]]
         [:p.inline
-          [:input {:type "range" :name "hours" :id "hour" :value 1 :min 1 :max 23}]
+          [:input {:type "range" :name "hours" :id "hour" :value 1 :min 1 :max 24}]
           [:span#hours "1 hours"]]
         [:p.inline
           [:input {:type "checkbox" :name "preresult" :id "preresult"}
