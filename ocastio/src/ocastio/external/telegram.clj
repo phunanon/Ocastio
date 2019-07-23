@@ -31,12 +31,14 @@
 (defn ballot-info [ballot-id]
   (let [{:keys [start hours] :as info}
           (db/ballot-info ballot-id)
-        num-vote (db/ballot-num-votes ballot-id)
-        state    (v/ballot-state start hours)
         is-poll  (db/poll? ballot-id)
         type     (if is-poll "poll" "ballot")
         Type     (str/capitalize type)]
-    (into info {:num-vote num-vote :state state :is-poll is-poll :type type :Type Type})))
+    (into info
+      {:num-vote (db/ballot-num-votes ballot-id)
+       :abstains (db/num-abstain ballot-id)
+       :state (v/ballot-state start hours)
+       :is-poll is-poll :type type :Type Type})))
 
 (defn bal-opts [{:keys [ballot_id is-poll]}]
   ((if is-poll db/bal-pol-options db/bal-law-options) ballot_id))
@@ -106,7 +108,7 @@
           (parse-bal-cmd text)]
     (if exists
       (let [{:keys [title desc start hours state
-                    num-vote is-poll type Type] :as bal-info}
+                    num-vote abstains is-poll type Type] :as bal-info}
               (ballot-info ballot-id)
             start-str   (f/unparse (f/formatter "yyyy-MM-dd HH:mm") (cljt/from-sql-date start))
             options     (bal-opts bal-info)
@@ -116,7 +118,8 @@
             method-info (str/join "" (drop 1 (v/make-method-info bal-info)))
             info-msg    (str "(" (bal-link ballot-id (name state) type) "; " start-str " for " hours "h)"
                              "\n*" Type " " ballot-id " | " num-vote " ✍️ | " title "*"
-                             "\n" method-info "\n_" desc "_\n" options)]
+                             "\n" method-info "\n_" desc "_\n" options
+                             "\n" abstains " abstain.")]
         (send-md! id info-msg))
       (send-tx! id "Ballot not found."))))
 
@@ -135,21 +138,31 @@
     (if exists
       (let [{:keys [title desc type is-poll start hours sco_range] :as bal-info}
               (ballot-info ballot-id)
-            options   (map :opt_id (bal-opts bal-info))
-            choices   (map edn/read-string (drop 2 text))
-            is-valid  (= (count options) (count choices))
-            is-valid  (and is-valid (every? int? choices))
-            is-valid  (and is-valid (every? #(< % sco_range) choices))
-            user-id   (db/contact->id username)
-            test-vote (vote/test-vote bal-info user-id)
-            reason    (test-vote->reason test-vote)
-            state     (v/ballot-state start hours)]
+            options     (map :opt_id (bal-opts bal-info))
+            choices     (map edn/read-string (drop 2 text))
+            is-abstain  (= (first choices) 'abstain)
+            is-valid
+              (if is-abstain
+                true
+                (and
+                  (= (count options) (count choices))
+                  (every? int? choices)
+                  (every? #(< % sco_range) choices)))
+            user-id     (db/contact->id username)
+            test-vote   (vote/test-vote bal-info user-id)
+            reason      (test-vote->reason test-vote)
+            state       (v/ballot-state start hours)
+            link        (bal-link ballot-id title type)]
         (if is-valid
           (if (= test-vote :authed)
-            (let [choices (map hash-map options choices)
-                  choices (reduce into choices)]
-              (db/vote-new! (db/contact->id username) ballot-id choices)
-              (send-md! id "Vote cast on " (bal-link ballot-id title type) "!"))
+            (if is-abstain
+              (do
+                (db/vote-new! user-id ballot-id {} true)
+                (send-md! id "Abstained on " link "!"))
+              (let [choices (map hash-map options choices)
+                    choices (reduce into choices)]
+                (db/vote-new! user-id ballot-id choices false)
+                (send-md! id "Vote cast on " link "!")))
             (send-tx! id "You are unable to vote on this " type ": " reason "."))
           (send-tx! id "Invalid options.")))
       (send-tx! id "Ballot not found."))))

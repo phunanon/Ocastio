@@ -303,14 +303,15 @@ JOIN org2con ON org2con.con_id = con.con_id
 JOIN org2user ON org2con.org_id = org2user.org_id
 WHERE org2con.is_exec AND org2user.user_id = ?" user-id]))
 
-(defn vote-new! [user-id ballot-id choices]
+(defn vote-new! [user-id ballot-id choices is-abstain]
   "Inserts choices {opt-num opt-val,} replacing existing user votes"
   ;Delete existing
   (jdbc/delete! db-spec :vote ["user_id = ? AND opt_id IN (SELECT opt_id FROM bal_opt WHERE ballot_id = ?)" user-id ballot-id])
-  ;Conj 0-value all-options hash-map with user choices
+  ;Conj 0-value or nil-value all-options hash-map with user choices
   (let [all-opts  (bal-pol-options ballot-id)
-        opt+0     (zipmap (map :opt_id all-opts) (repeat 0))
-        choices   (conj opt+0 choices)]
+        blank     (if is-abstain nil 0)
+        opt+blank (zipmap (map :opt_id all-opts) (repeat blank))
+        choices   (conj opt+blank choices)]
     ;Insert new votes
     (doseq [choice choices]
       (jdbc/insert! db-spec :vote {:user_id user-id :opt_id (choice 0) :value (choice 1)}))))
@@ -329,10 +330,19 @@ JOIN bal_opt ON bal_opt.opt_id = vote.opt_id)"])))
 (defn vot-per-app [ballot-id max-score]
   (jdbc/query db-spec [(str "
 SELECT opt_id, text, law_id,
-       IFNULL(sum, 0) sum, max * " max-score " max, IFNULL((sum / (max * " max-score ")), 0) approval
+  IFNULL(sum, 0) sum,
+  max * " max-score " max,
+  IFNULL((sum / (max * " max-score ")), 0) approval
 FROM (SELECT opt_id, text, law_id,
         (SELECT COUNT(*) max FROM vote
-        WHERE vote.opt_id = bal_opt.opt_id) max,
+        WHERE vote.opt_id = bal_opt.opt_id
+        AND vote.value IS NOT NULL) max,
         (SELECT SUM(vote.value) FROM vote
         WHERE vote.opt_id = bal_opt.opt_id) sum
     FROM bal_opt WHERE ballot_id = ?)") ballot-id]))
+
+(defn num-abstain [ballot-id]
+  (fvf (jdbc/query db-spec ["
+SELECT COUNT(distinct user_id) FROM vote 
+JOIN bal_opt ON bal_opt.opt_id = vote.opt_id
+WHERE bal_opt.ballot_id = ? AND value IS NULL" ballot-id])))

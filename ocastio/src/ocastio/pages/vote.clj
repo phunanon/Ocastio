@@ -4,6 +4,7 @@
     [ocastio.db :as db]
     [ocastio.html.result :as r]
     [clojure.string :as str]
+    [hiccup.page :as h]
     [clj-time.core :as t]
     [clj-time.format :as f]
     [ring.util.anti-forgery :as util])
@@ -43,18 +44,19 @@
 ; TODO check options are of ballot
 (defn vote! [{{:keys [ballot_id] :as para} :params
               {:keys [email] :as sess}     :session}]
-  (let [user-id   (db/email->id (:email sess))
-        is-poll   (db/poll? ballot_id)
-        type      (if is-poll "poll" "ballot")
+  (let [user-id     (db/email->id (:email sess))
+        is-poll     (db/poll? ballot_id)
+        type        (if is-poll "poll" "ballot")
         {:keys [method_id sco_range] :as bal-info}
           (db/ballot-basic-info ballot_id)
-        test-vote (test-vote bal-info user-id)
-        opts      (select-opts para)
+        test-vote   (test-vote bal-info user-id)
+        opts        (select-opts para)
+        is-abstain  (:abstain para)
         {:keys [is_score]}
           (db/method-info method_id)
-        opts      (if is_score (normalise-vals opts sco_range) opts)]
+        opts        (if is_score (normalise-vals opts sco_range) opts)]
     (if (= test-vote :authed)
-      (db/vote-new! user-id ballot_id opts))
+      (db/vote-new! user-id ballot_id opts is-abstain))
     {:redir (str "/" type "/" ballot_id) :sess sess}))
 
 (defn make-check-input [{:keys [opt_id text] :as option}]
@@ -76,20 +78,23 @@
     [:span (v/make-option-text option)]])
 
 (defn make-option-form [options ballot-id method-id range]
-    [:form {:action (str "/vote/" ballot-id) :method "POST"}
+    [:form#vote {:action (str "/vote/" ballot-id) :method "POST" :data-stv (= method-id 5)}
       (util/anti-forgery-field)
       [:br]
-      (let [check-in make-check-input
-            score-in (partial make-score-input range)]
+      (let [check-in  make-check-input
+            score-in  (partial make-score-input range)
+            ranked-in (partial make-score-input (count options))]
         (map
           (case method-id
             0 "n/a"
             1 check-in
             2 score-in
             3 check-in
-            4 score-in)
+            4 score-in
+            5 ranked-in)
           options))
-      [:input {:type "submit" :value "Cast vote"}]])
+      [:input {:type "submit" :value "Cast vote"}]
+      [:input {:type "submit" :name "abstain" :value "Abstain"}]])
 
 (defn make-option-info [options]
   [:ol (map #(vector :li (v/make-option-text %)) options)])
@@ -122,14 +127,14 @@
 
           Type      (if poll? "Poll" "Ballot")
           type      (str/lower-case Type)]
-      (compose (str title " | " Type) nil
+      (compose (str title " | " Type) (h/include-js "/js/ballot.js")
         (if poll?
           [:navinfo "Conducted by "  [:a {:href (str "/org/" org_id)} org-name] "."]
           [:navinfo "Conducted for " [:a {:href (str "/con/" con-id)} con-name] "."])
         [:h2 title [:grey " | " Type]]
         [:p (v/make-method-info info)]
         [:p "From " [:b (v/format-inst start)] " for " [:b hours "h"] "."]
-        [:quote desc]
+        [:quote (if (= desc "") "No description." desc)]
         (let [{:keys [complete? ongoing? future?]}
                 {(keyword (str (name state) "?")) true}]
           [:div
@@ -149,7 +154,7 @@
             (if (and (not future?) results?)
               [:div
                 [:h3 "Results"]
-                [:p num-votes " " (v/plu "vote" num-votes) " total."]
+                [:p num-votes " " (v/plu "vote" num-votes) " total, " (db/num-abstain ballot-id) " abstain."]
                 (r/ballot-results-html ballot-id)])])
         (if (if poll? admin? exec?)
           (v/make-del-button (str "/bal/del/" ballot-id) type)))))))
