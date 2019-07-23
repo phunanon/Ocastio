@@ -164,10 +164,14 @@
   (let [user-id (db/contact->id username)
         polls   (db/user-polls user-id)
         ballots (db/user-ballots user-id)
+        are-pol (not-empty polls)
+        are-bal (not-empty ballots)
         do-list #(str/join "\n" (map (partial simple-item %) %2))]
     (send-md! id
-      "*Polls*\n" (do-list "poll" polls)
-      "\n*Ballots*\n" (do-list "ballot" ballots))))
+      (if are-pol (str "*Polls*\n" (do-list "poll" polls)))
+      (if are-bal (str "\n*Ballots*\n" (do-list "ballot" ballots))))
+    (if (not (or are-pol are-bal))
+      (send-tx! id "No polls/ballots for you to vote on."))))
 
 (h/defhandler telegram-handler
   (h/command-fn "start" cmd-start)
