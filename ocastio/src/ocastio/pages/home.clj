@@ -7,12 +7,12 @@
 (defn num-rec [table] (db/num-records (name table)))
 
 (def stats [
+  ["votes"          (db/num-votes)]
+  ["ballots/polls"  (num-rec :ballot)]
+  ["laws"           (num-rec :law)]
   ["users"          (num-rec :user)]
   ["organisations"  (num-rec :org)]
-  ["constitutions"  (num-rec :con)]
-  ["laws"           (num-rec :law)]
-  ["ballots/polls"  (num-rec :ballot)]
-  ["votes"          (db/num-votes)]])
+  ["constitutions"  (num-rec :con)]])
 
 ;TODO: cache
 (defn gen-stats []
@@ -24,11 +24,11 @@
   (compose "Home" nil
     [:div#stats (gen-stats)]
     [:h2 "Welcome"]
-    [:b "Ocastio enables organisations to post ballots and compose constitutions."]
-    [:p "Ocastio has flexibility at heart. Organisations can adopt constitutions, as executives or members, allowing seperate bodies fine-grain control over their legislation. You can use the same voting systems to post referenda/polls to organisational members."]
-    [:p "It is up to each organisation to implement and interpret the spirit & letter of their legislation - Ocastio offering the platform and management."]
+    [:p [:b "Ocastio enables organisations to post ballots and compose constitutions."]]
+    [:p "Flexibility is at heart. Organisations can adopt constitutions, as executives or members, allowing seperate bodies fine-grain control over their legislation. You can use the same voting systems to post referenda/polls to organisational members."]
+    [:p "Organisations implement and interpret the spirit & letter of their legislation, Ocastio offering the platform and management."]
     [:warning
-      [:p "This website is in initial development. Everything is liable to break or be incomplete; sessions may terminate unexpectedly; data may be lost (including your account); the website may go offline for indefinite periods; your connection is insecure; there is no electoral integrity; the style is tentative."]
+      [:p "This website is in initial development. Everything is liable to break or be incomplete; sessions may terminate unexpectedly; data may be lost (including your account); the website may go offline for indefinite periods."]
       [:p "Currently supported voting systems:"]
       [:ul
         [:li "Majority Approvals - individual options approved by majority"]
