@@ -25,7 +25,7 @@
 (defn test-vote [bal-info user-id]
   (let [{:keys [ballot_id start hours org_id]}
           bal-info
-        state (v/ballot-state start hours)]
+        state (v/ballot-state bal-info)]
     (if (= state :ongoing)
       (if
         (if org_id
@@ -122,7 +122,7 @@
 
           admin?    (db/org-admin? org_id email)
           exec?     (db/con-exec? con-id email)
-          state     (v/ballot-state start hours)
+          state     (v/ballot-state info)
           results?  (or (= state :complete) preresult)
 
           Type      (if poll? "Poll" "Ballot")

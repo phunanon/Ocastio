@@ -291,8 +291,10 @@ LIMIT 1" org-id user-id]))))
 
 (defn user-polls [user-id]
   (jdbc/query db-spec ["SELECT * FROM ballot 
-  JOIN org2user ON ballot.org_id = org2user.org_id
-  WHERE org2user.user_id = ?" user-id]))
+JOIN org2user ON ballot.org_id = org2user.org_id
+WHERE org2user.user_id = ?
+AND DateAdd (hour, hours, start) > CURRENT_TIMESTAMP
+ORDER BY ballot.ballot_id" user-id]))
 
 (defn user-ballots [user-id]
   (jdbc/query db-spec ["SELECT DISTINCT ballot.ballot_id, ballot.title FROM ballot
@@ -301,7 +303,9 @@ JOIN law ON law.law_id = bal_opt.law_id
 JOIN con ON con.con_id = law.con_id
 JOIN org2con ON org2con.con_id = con.con_id
 JOIN org2user ON org2con.org_id = org2user.org_id
-WHERE org2con.is_exec AND org2user.user_id = ?" user-id]))
+WHERE org2con.is_exec AND org2user.user_id = ?
+AND DateAdd (hour, hours, start) > CURRENT_TIMESTAMP
+ORDER BY ballot.ballot_id" user-id]))
 
 (defn vote-new! [user-id ballot-id choices is-abstain]
   "Inserts choices {opt-num opt-val,} replacing existing user votes"
