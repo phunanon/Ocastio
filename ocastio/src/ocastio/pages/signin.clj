@@ -11,43 +11,39 @@
   :email-exists   "The email supplied is already registered."
   :email-invalid  "The email supplied is invalid."})
 
-; TODO don't allow empty username, password
-(defn page [{{redir :redir :as para} :params
-             sess                    :session
-             :as request}
+(defn page [{{:keys [ref]}      :params
+             {:keys [sign-err]} :session}
             compose]
-  (let [action    (if (nil? redir) "/sign" (str "/sign?redir=" redir))
-        sign-err  (:sign-err sess)]
-    (compose "Signin" nil
-      [:p "Signin or register as an Ocastio user."]
-      (if (some? sign-err) [:b (sign-err error-messages)])
-      [:form {:action action :method "POST"}
-        (util/anti-forgery-field)
-        [:input {:type "text"     :placeholder "Email" :name "email"}]
-        [:input {:type "password" :placeholder "Password" :name "password"}]
-        [:input {:type "submit"   :value "Sign in" :name "signin"}]
-        [:input {:type "submit"   :value "Register" :name "register"}]])))
+  (compose "Signin" nil
+           [:p "Signin or register as an Ocastio user."]
+           (if (some? sign-err) [:b (sign-err error-messages)])
+           [:form {:action (str "/sign?ref=" ref) :method "POST"}
+            (util/anti-forgery-field)
+            [:input {:type "text"     :placeholder "Email" :name "email"
+                     :pattern ".{6,}" :required true :title ">6 char"}]
+            [:input {:type "password" :placeholder "Password" :name "password"
+                     :pattern ".{7,}" :required true :title ">7 char"}]
+            [:input {:type "submit"   :value "Sign in" :name "signin"}]
+            [:input {:type "submit"   :value "Register" :name "register"}]]))
 
-(defn sign! [{{email :email pass :password :as para} :params :as request}]
-  (let [signin?   (nil? (:register para))
-        exists?   (db/email-exists? email)
-        session   (:session request)
-        session   (dissoc session :sign-err)
-        redirect  (:redir para)
-        nextdir   (if (nil? redirect) "/" redirect)
-        return    (fn [redir sess] {:redir redir :sess (into session sess)})]
+(defn sign! [{{:keys [email password ref register]} :params}]
+  (let [is-signin (nil? register)
+        exists    (db/email-exists? email)
+        return    #(hash-map :redir % :sess %2)
+        succeed   #(return (if ref ref "/") {:email email})
+        err-retry #(return (str "/signin?ref=" ref) {:sign-err %})]
     (if (v/valid-email? email)
-      (if signin?
-        (if exists?
-          (if (db/correct-pass? email pass)
-            (return nextdir   {:email email})
-            (return "/signin" {:sign-err :pass-incorrect}))
-          (return "/signin" {:sign-err :email-nonexist}))
-        (if exists?
-          (return "/signin" {:sign-err :email-exists})
-          (do (db/new-user! email pass)
-              (return nextdir {:email email}))))
-      (return "/signin" {:sign-err :email-invalid}))))
+      (if is-signin
+        (if exists
+          (if (db/correct-pass? email password)
+            (succeed)
+            (err-retry :pass-incorrect))
+          (err-retry :email-nonexist))
+        (if exists
+          (err-retry :email-exists)
+          (do (db/new-user! email password)
+              (succeed))))
+      (err-retry :email-invalid))))
 
-(defn signout [{{redir :redir} :params}]
-  {:redir (if redir redir "/") :sess {}})
+(defn signout [{{ref "referer"} :headers}]
+  {:redir (if ref ref "/") :sess {}})

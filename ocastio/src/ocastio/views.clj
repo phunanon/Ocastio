@@ -69,8 +69,8 @@
       ;(nav-link "Constitutions" "/cons")
       ;(nav-link "Ballots" "/ballots")
       (if email
-        (nav-link "Sign out" (str "/signout?redir=" uri))
-        (nav-link "Account" (str "/signin?redir=" uri)))]
+        (nav-link "Sign out" (str "/signout?ref=" uri))
+        (nav-link "Account" (str "/signin?ref=" uri)))]
     (h/include-css "/css/page.css")
     (h/include-css "/css/head.css")
     [:a {:href "/"} [:img {:src "/img/logo.svg"}]]])
