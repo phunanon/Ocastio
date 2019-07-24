@@ -29,6 +29,7 @@ img.small {
 
 pre {
 	white-space: pre-wrap;
+	overflow-x: auto;
 }
 
 

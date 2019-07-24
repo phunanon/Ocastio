@@ -28,7 +28,7 @@ leaf leaftitle {
 	display: inline-block;
 	margin: .5rem .5rem 0 .5rem;
 	padding: .25rem;
-	max-width: calc(100% - 3rem);
+	max-width: calc(100% - 7rem);
 }
 leaf leafvotes {
 	display: inline-block;
