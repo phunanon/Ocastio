@@ -37,7 +37,7 @@
     (into info
       {:num-vote (db/ballot-num-votes ballot-id)
        :abstains (db/num-abstain ballot-id)
-       :state (v/ballot-state start hours)
+       :state (v/ballot-state info)
        :is-poll is-poll :type type :Type Type})))
 
 (defn bal-opts [{:keys [ballot_id is-poll]}]
@@ -110,13 +110,15 @@
       (let [{:keys [title desc start hours state
                     num-vote abstains is-poll type Type] :as bal-info}
               (ballot-info ballot-id)
-            start-str   (f/unparse (f/formatter "yyyy-MM-dd HH:mm") (cljt/from-sql-date start))
+            start-str   (f/unparse (f/formatter "yy-MM-dd HH:mm") (cljt/from-sql-date start))
             options     (bal-opts bal-info)
             options     (assoc-results options (r/ballot-results ballot-id))
             options     (map (partial make-option-item bal-info) options (range))
             options     (str/join "\n" options)
             method-info (str/join "" (drop 1 (v/make-method-info bal-info)))
-            info-msg    (str "(" (bal-link ballot-id (name state) type) "; " start-str " for " hours "h)"
+            remaining   (str "; " (v/ballot-remain-str bal-info))
+            remaining   (if (neg? (v/ballot-sec-remain bal-info)) "" remaining)
+            info-msg    (str (bal-link ballot-id (name state) type) "; " start-str ", " hours "h" remaining
                              "\n*" Type " " ballot-id " | " num-vote " ✍️ | " title "*"
                              "\n" method-info "\n_" desc "_\n" options
                              "\n" abstains " abstain.")]
@@ -152,7 +154,7 @@
             user-id     (db/contact->id username)
             test-vote   (vote/test-vote bal-info user-id)
             reason      (test-vote->reason test-vote)
-            state       (v/ballot-state start hours)
+            state       (v/ballot-state bal-info)
             link        (bal-link ballot-id title type)]
         (if is-valid
           (if (= test-vote :authed)

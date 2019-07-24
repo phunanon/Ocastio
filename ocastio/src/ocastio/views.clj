@@ -3,6 +3,7 @@
     [ocastio.db :as db]
     [clojure.string :as str]
     [clj-time.core :as t]
+    [clj-time.coerce :as tc]
     [hiccup.page :as h]
     [ring.util.anti-forgery :as util])
   (:import (java.time Instant ZoneId LocalDateTime format.DateTimeFormatter)))  ;TODO phase-out in preference of clj-time
@@ -30,12 +31,28 @@
 (defn format-inst [inst]
   (.format date-format (inst->LocalDateTime inst)))
 
-(def ^:const hour-secs (* 60 60))
-(defn ballot-state [start hours]
-  "Returns :future :ongoing or :complete"
+
+(defn ballot-sec-until [{:keys [start hours]}]
   (let [times (map inst-ms [(t/now) start])
-        times (map #(quot % 1000) times)
-        diff  (apply - times)]
+        times (map #(quot % 1000) times)]
+    (apply - times)))
+(defn ballot-sec-remain [{:keys [start hours]}]
+  (let [start (tc/from-sql-date start)
+        end   (t/plus start (t/hours hours))
+        times (map inst-ms [end (t/now)])
+        times (map #(quot % 1000) times)]
+    (apply - times)))
+(defn ballot-remain-str [{:keys [start hours] :as bal-info}]
+  (let [s (ballot-sec-remain bal-info)
+        m (quot s 60)
+        h (quot m 60)
+        d (quot h 60)]
+    (str d "d " (mod h 60) "h " (mod m 60) "m")))
+
+(def ^:const hour-secs (* 60 60))
+(defn ballot-state [{:keys [hours] :as info}]
+  "Returns :future :ongoing or :complete"
+  (let [diff (ballot-sec-until info)]
     (if (neg? diff)
       :future
       (if (> diff (* hour-secs hours))
@@ -93,8 +110,7 @@
     (str "/" type "/" ballot_id)))
 
 (defn make-ballot-links [ballots type]
-  (let [get-state #(ballot-state (:start %) (:hours %))
-        ballots   (map #(assoc % :state (get-state %)) ballots)
+  (let [ballots   (map #(assoc % :state (ballot-state %)) ballots)
         triage    (group-by :state ballots)]
   (map
     (fn [[state ballots]]
