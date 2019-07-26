@@ -59,9 +59,9 @@
               "\n/mine\n  see ballots/polls you can vote on"
               "\n/vote ballot-id 0-n ...\n  vote on ballots/polls. 0-n is the range, with 0-1 for approval voting."))
 
-(defn cmd-register! [{{:keys [id]}       :chat
-                      {:keys [username]} :from
-                      text               :text}]
+(defn cmd-register! [{{:keys [id]}   :chat
+                      {username :id} :from
+                      text           :text}]
   (let [text      (str/split text #" ")
         email     (text 1)
         pass      (text 2)
@@ -75,18 +75,18 @@
     (if a-exists  (send-tx! id "Email already authorised."))
     (when (not (or e-invalid p-invalid e-exists a-exists))
       (db/new-user! email pass)
-      (db/set-user-contact! email username)
+      (db/set-user-contact! email (str "tg:" username))
       (send-tx! id "Email registered and authenticated."))))
 
-(defn cmd-auth! [{{:keys [id]}       :chat
-                  {:keys [username]} :from
-                  text               :text}]
+(defn cmd-auth! [{{:keys [id]}   :chat
+                  {username :id} :from
+                  text           :text}]
   (let [text  (str/split text #" ")
         email (text 1)
         pass  (text 2)]
     (if (db/correct-pass? email pass)
       (do
-        (db/set-user-contact! email username)
+        (db/set-user-contact! email (str "tg:" username))
         (send-tx! id "Authenticated."))
       (send-tx! id "Unable to authenticate."))))
 
@@ -135,9 +135,9 @@
     :future "it has not yet begun"}
       test-vote))
 
-(defn cmd-vote! [{{:keys [id]}       :chat
-                  {:keys [username]} :from
-                  text               :text}]
+(defn cmd-vote! [{{:keys [id]}   :chat
+                  {username :id} :from
+                  text           :text}]
   (let [{:keys [text ballot-id exists]}
           (parse-bal-cmd text)]
     (if exists
@@ -154,7 +154,7 @@
                   (= (count options) (count choices))
                   (every? int? choices)
                   (every? #(< % sco_range) choices)))
-            user-id     (db/contact->id username)
+            user-id     (db/contact->id (str "tg:" username))
             test-vote   (vote/test-vote bal-info user-id)
             reason      (test-vote->reason test-vote)
             state       (v/ballot-state bal-info)
@@ -177,10 +177,10 @@
 (defn simple-item [type {:keys [ballot_id title]}]
   (str "[🔗 " ballot_id "](https://ocastio.uk/" type "/" ballot_id "): " title))
 
-(defn cmd-mine [{{:keys [id]}       :chat
-                 {:keys [username]} :from
-                 text               :text}]
-  (let [user-id (db/contact->id username)
+(defn cmd-mine [{{:keys [id]}   :chat
+                 {username :id} :from
+                 text           :text}]
+  (let [user-id (db/contact->id (str "tg:" username))
         polls   (db/user-polls user-id)
         ballots (db/user-ballots user-id)
         are-pol (not-empty polls)
