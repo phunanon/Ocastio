@@ -116,12 +116,15 @@
             options     (map (partial make-option-item bal-info) options (range))
             options     (str/join "\n" options)
             method-info (str/join "" (drop 1 (v/make-method-info bal-info)))
-            remaining   (str "; " (v/ballot-remain-str bal-info))
-            remaining   (if (neg? (v/ballot-sec-remain bal-info)) "" remaining)
-            info-msg    (str (bal-link ballot-id (name state) type) "; " start-str ", " hours "h" remaining
-                             "\n*" Type " " ballot-id " | " num-vote " ✍️ | " title "*"
-                             "\n" method-info "\n_" desc "_\n" options
-                             "\n" abstains " abstain.")]
+            remaining   (str (v/ballot-remain-str bal-info) " remaining")
+            remaining   (case state :complete "complete" :future "future" :ongoing remaining)
+            info-msg    (str
+                          (bal-link ballot-id (str Type " " ballot-id) type)
+                          ", " remaining
+                          "\n" start-str ", " hours "h long"
+                          "\n*" title "*"
+                          "\n" method-info "\n_" desc "_\n" options
+                          "\n*" num-vote (v/plu " vote" num-vote) "* with " abstains " abstain.")]
         (send-md! id info-msg))
       (send-tx! id "Ballot not found."))))
 
@@ -185,9 +188,8 @@
         do-list #(str/join "\n" (map (partial simple-item %) %2))]
     (send-md! id
       (if are-pol (str "*Polls*\n" (do-list "poll" polls)))
-      (if are-bal (str "\n*Ballots*\n" (do-list "ballot" ballots))))
-    (if (not (or are-pol are-bal))
-      (send-tx! id "No polls/ballots for you to vote on."))))
+      (if are-bal (str "\n*Ballots*\n" (do-list "ballot" ballots)))
+      (if (not (or are-pol are-bal)) "None are available for you at this time."))))
 
 (h/defhandler telegram-handler
   (h/command-fn "start" cmd-start)
