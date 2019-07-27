@@ -33,7 +33,7 @@
   :orgs     [org/orgs-page  no-auth]
   :org-new  [org/page-new   signed?]
   :org      [org/org-page   no-auth]
-  :org-mems [org/page-mems  signed?] ;TODO
+  :org-mems [org/page-mems  org-admin?]
   :pol-new  [pol/page-new   signed?] ;TODO
   :poll     [pol/page       no-auth]
   :con      [con/page       no-auth]

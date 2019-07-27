@@ -66,13 +66,11 @@
         (if (empty? polls) [:p "No polls posted."])
         (v/make-ballot-links polls "poll"))))
 
-;TODO: advocate auth func
-(defn page-mems [{{email :email :as sess} :session :as request} compose]
-  (let [org-id  (get-in request [:route-params :org-id])
-        org-id  (Integer/parseInt org-id)
-        admin?  (db/org-admin? org-id email)
-        info    (db/org-info org-id)
-        name    (:name info)]
+(defn page-mems [{{:keys [org-id]} :params
+                  {:keys [email]}  :session}
+                 compose]
+  (let [org-id         (Integer. org-id)
+        {:keys [name]} (db/org-info org-id)]
     (compose "Members management" nil
       [:p.admin "Administrative section for " (v/org-link org-id name) "."]
       [:h2 "Members Management"]
