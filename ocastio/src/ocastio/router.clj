@@ -39,9 +39,9 @@
   :con      [con/page       no-auth]
   :con-new  [con/page-new   org-admin?]
   :law      [law/page       no-auth]
-  :law-new  [law/page-new   signed?] ;TODO
+  :law-new  [law/page-new   con-exec?]
   :ballots  [bal/page-all   no-auth]
-  :bal-new  [bal/page-new   signed?] ;TODO
+  :bal-new  [bal/page-new   con-exec?]
   :ballot   [bal/page       no-auth]
 })
 
