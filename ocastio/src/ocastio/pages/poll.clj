@@ -16,9 +16,8 @@
       [:input {:type "text" :name "opt0" :placeholder "Option body" :onkeydown "return OptionKey(event, this)"}]]])
 
 (defn page-new [{{:keys [org-id] :as para} :params} compose]
-  (let [org-id      (Integer. org-id)
-        org-info    (db/org-info org-id)
-        org-name    (:name org-info)]
+  (let [org-id         (Integer. org-id)
+        {:keys [name]} (db/org-info org-id)]
     (compose "New Poll" (h/include-js "/js/vote.js")
-      [:p "Enter the details of the new poll in " [:a {:href (str "/org/" org-id)} org-name] "."]
+      [:p "Enter the details of the new poll in " [:a {:href (str "/org/" org-id)} name] "."]
       (vote/make-form-new "poll" "Poll" org-id option-form))))
