@@ -45,15 +45,13 @@
   :ballot   [bal/page       no-auth]
 })
 
-(defn page [request where]
+(defn page [{:keys [params session uri] :as request} where]
   (if (contains? pages where)
-    (let [para        (:params request)
-          sess        (:session request)
-          entry       (where pages)
+    (let [entry       (where pages)
           maker       (entry 0)
-          authed?     ((entry 1) para sess)
+          authed?     ((entry 1) params session)
           compose     (partial v/compose-page request)
-          sign-redir  (str "/signin?redir=" (:uri request))]
+          sign-redir  (str "/signin?ref=" uri)]
       (if authed?
         (make-response (maker request compose))
         (resp/redirect sign-redir)))
@@ -89,16 +87,9 @@
 
 (defn post [request what]
   (if (some? (what posts))
-    (let [result   (do-action request what)
-          session  (:sess  result)
-          redirect (:redir result)] ;TODO: rename :next
-      (-> (resp/redirect redirect)
-          (assoc :session session)
+    (let [{:keys [redir sess]} ;TODO: rename :next
+            (do-action request what)]
+      (-> (resp/redirect redir)
+          (assoc :session sess)
           (resp/content-type "text/html")))
     (make-response (str "router: unknown post: " what))))
-
-(defn signin-post [request]
-  (let [response (resp/redirect "/")
-        sign-map (sig/sign! request)
-        response (assoc response :session sign-map)]
-    (resp/content-type response "text/html")))
