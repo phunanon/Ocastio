@@ -37,7 +37,7 @@
   :pol-new  [pol/page-new   org-admin?]
   :poll     [pol/page       no-auth]
   :con      [con/page       no-auth]
-  :con-new  [con/page-new   signed?] ;TODO
+  :con-new  [con/page-new   org-admin?]
   :law      [law/page       no-auth]
   :law-new  [law/page-new   signed?] ;TODO
   :ballots  [bal/page-all   no-auth]

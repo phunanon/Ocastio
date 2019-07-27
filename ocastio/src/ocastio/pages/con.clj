@@ -8,12 +8,10 @@
     [hiccup.page :as page]
     [ring.util.anti-forgery :as util]))
 
-(defn page-new [{uri              :uri
-                 {:keys [org-id]} :params} compose]
-  (let [org-info  (db/org-info org-id)
-        org-name  (:name org-info)]
+(defn page-new [{{:keys [org-id]} :params uri :uri} compose]
+  (let [{:keys [name]} (db/org-info org-id)]
     (compose "New constitution" nil
-      [:p "Enter the details of the new constitution for " [:a {:href (str "/org/" org-id)} org-name] "."]
+      [:p "Enter the details of the new constitution for " [:a {:href (str "/org/" org-id)} name] "."]
       [:form {:action uri :method "POST"}
         (util/anti-forgery-field)
         [:input    {:type "text"    :name "title" :placeholder "Constitution title"}]
@@ -100,13 +98,12 @@
   (let [con-id    (Integer. con-id)
         orgs      (db/con-orgs-info con-id)
         laws      (db/con-laws con-id)
-        info      (db/con-info con-id)
-        title     (:title info)
-        desc      (:desc info)
+        {:keys [title desc]}
+          (db/con-info con-id)
         num-mem   (db/con-num-mem con-id)
         is-exec  (db/con-exec? con-id email)
 
-        ballots   (db/con-ballots con-id)
+        ballots  (db/con-ballots con-id)
         all-laws (db/con-laws con-id)
         all-laws (map assoc-result all-laws)
         num-act  (count (filter (comp true? :won?) all-laws))
