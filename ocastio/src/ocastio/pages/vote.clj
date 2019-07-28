@@ -7,6 +7,7 @@
     [hiccup.page :as h]
     [clj-time.core :as t]
     [clj-time.format :as f]
+    [clj-time.coerce :as tc]
     [ring.util.anti-forgery :as util])
   (:import (java.time Instant ZoneId LocalDateTime format.DateTimeFormatter))) ;TODO phase-out in preference of clj-time
 
@@ -209,7 +210,8 @@
     :num_win    (Integer. num_win)
     :sco_range  (Integer. sco_range)
     :majority   (Integer. majority)
-    :start      (LocalDateTime/parse (str date " " time) v/date-format)
+    :start
+      (tc/to-sql-time (f/parse (f/formatter "yyy-MM-dd HH:mm") (str date " " time)))
     :hours      (+ (Integer. hours) (* (Integer. days) 24))
     :preresult  (boolean preresult)})
 
