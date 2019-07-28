@@ -63,7 +63,6 @@
         [:ul (map make-con-link cons)]
       [:h3 "Polls"]
         (if admin? [:p.admin [:a {:href (str "/poll/new/" org-id)} "New poll"]])
-        (if (empty? polls) [:p "No polls posted."])
         (v/make-ballot-links polls "poll"))))
 
 (defn page-mems [{{:keys [org-id]} :params

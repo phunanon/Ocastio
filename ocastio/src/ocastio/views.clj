@@ -110,13 +110,16 @@
     (str "/" type "/" ballot_id)))
 
 (defn make-ballot-links [ballots type]
-  (let [ballots   (map #(assoc % :state (ballot-state %)) ballots)
-        triage    (group-by :state ballots)]
+  (let [ballots (map #(assoc % :state (ballot-state %)) ballots)
+        triage  (group-by :state ballots)
+        triage  (map #(vector % (triage %)) [:ongoing :future :complete])]
   (map
     (fn [[state ballots]]
       [:ul
         [:h4 (str/capitalize (name state))]
-        (map #(make-ballot-link % type) ballots)])
+        (if (empty? ballots)
+          [:p "No ballots in this period."]
+          (map #(make-ballot-link % type) ballots))])
     triage)))
 
 (defn make-law-link [{:keys [law_id title]}]
