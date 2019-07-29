@@ -135,7 +135,7 @@
         [:h2 title [:grey " | " Type]]
         [:p (v/make-method-info info)]
         [:p "From " [:b (v/format-inst start)] " for " [:b hours "h"] "."]
-        [:quote (if (= desc "") "No description." desc)]
+        [:quote [:pre (if (= desc "") "No description." desc)]]
         (let [{:keys [complete? ongoing? future?]}
                 {(keyword (str (name state) "?")) true}]
           [:div
