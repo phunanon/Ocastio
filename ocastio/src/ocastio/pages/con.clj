@@ -50,7 +50,7 @@
 
 
 (defn vote-bar [vote%]
-  [:votebar [:forbar {:style (str "width: " vote% "%")}]])
+  [:votebar [:forbar {:style (str "width: " (int vote%) "%")}]])
 
 (defn render-leaf [{:keys [approval won? law_id bal-id title body]} by-parent parent-active?]
   (let [active?      (and parent-active? won?)
