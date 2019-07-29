@@ -110,7 +110,6 @@
       (let [{:keys [title desc start hours state
                     num-vote abstains is-poll type Type] :as bal-info}
               (ballot-info ballot-id)
-            start-str   (f/unparse (f/formatter "yy-MM-dd HH:mm") (cljt/from-sql-date start))
             options     (bal-opts bal-info)
             options     (assoc-results options (r/ballot-results ballot-id))
             options     (map (partial make-option-item bal-info) options (range))
@@ -121,7 +120,7 @@
             info-msg    (str
                           (bal-link ballot-id (str Type " " ballot-id) type)
                           ", " remaining
-                          "\n" start-str ", " hours "h long"
+                          "\n" (v/ballot-time-str start hours)
                           "\n*" title "*"
                           "\n" method-info "\n_" desc "_\n" options
                           "\n*" num-vote (v/plu " vote" num-vote) "* with " abstains " abstain.")]

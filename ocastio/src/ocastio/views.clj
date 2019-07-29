@@ -3,6 +3,7 @@
     [ocastio.db :as db]
     [clojure.string :as str]
     [clj-time.core :as t]
+    [clj-time.format :as f]
     [clj-time.coerce :as tc]
     [hiccup.page :as h]
     [ring.util.anti-forgery :as util])
@@ -30,6 +31,10 @@
   (.toLocalDateTime (.atZone (Instant/ofEpochMilli (inst-ms inst)) (ZoneId/of"UTC"))))
 (defn format-inst [inst]
   (.format date-format (inst->LocalDateTime inst)))
+
+(defn ballot-time-str [start hours]
+  (str (f/unparse (f/formatter "yy-MM-dd HH:mm") (tc/from-sql-date start))
+       " for " hours "h"))
 
 
 (defn ballot-sec-until [{:keys [start hours]}]
@@ -99,14 +104,17 @@
         facts (str/join ", " facts)]
     [:span name " (" facts ")"]))
 
-(defn make-ballot-link [{:keys [ballot_id title num_win num_opt method_id state] :as info}
+(defn make-ballot-link [{:keys [ballot_id title start hours
+                                num_win num_opt method_id state] :as info}
                         type]
   "Accepts [ballot-info ballot-type]"
   (def num-votes (db/ballot-num-votes ballot_id))
   (li-link
-    [:span
+    [:span.ballot
       [:bl title] [:br]
-      [:b num-votes] " " (plu "vote" num-votes) ", " (make-method-info info)]
+      [:stat [:b num-votes] " " (plu "vote" num-votes)]
+      [:stat (ballot-time-str start hours)]
+      [:stat (make-method-info info)]]
     (str "/" type "/" ballot_id)))
 
 (defn make-ballot-links [ballots type]

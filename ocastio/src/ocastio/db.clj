@@ -274,7 +274,8 @@ JOIN method   ON method.method_id = ballot.method_id
 JOIN bal_opt  ON bal_opt.ballot_id  = ballot.ballot_id
 JOIN law      ON law.law_id         = bal_opt.law_id
 WHERE law.con_id = ?
-GROUP BY ballot.ballot_id" con-id]))
+GROUP BY ballot.ballot_id
+ORDER BY ballot.start DESC" con-id]))
 
 (defn bal->con [ballot-id]
   (fvf (jdbc/query db-spec ["

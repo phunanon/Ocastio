@@ -87,6 +87,11 @@ textarea.big {
 	width: 3rem;
 }
 
+.ballot stat {
+	display: inline-block;
+	padding-right: 1rem;
+}
+
 .inline {
 	display : flex;
 	align-items : center;
