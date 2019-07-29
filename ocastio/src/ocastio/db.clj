@@ -71,7 +71,7 @@
 
 (defn orgs-stats []
   (jdbc/query db-spec ["
-SELECT org.org_id, org.name, org.img,
+SELECT org.org_id, org.name, org.desc, org.img,
 (SELECT COUNT(*) FROM org2user WHERE org2user.org_id = org.org_id) \"num-mem\",
 (SELECT COUNT(*) FROM org2con WHERE org2con.org_id = org.org_id) \"num-con\",
 (SELECT COUNT(*) FROM ballot  WHERE ballot.org_id  = org.org_id) \"num-pol\"
@@ -80,7 +80,7 @@ ORDER BY \"num-mem\" DESC"]))
 
 (defn org-info [org-id]
   (first (jdbc/query db-spec ["
-SELECT org.name, desc, contact, COUNT(*) members
+SELECT org.name, desc, contact, img, COUNT(*) members
 FROM org2user
 JOIN org ON org.org_id = org2user.org_id
 WHERE org.org_id = ?" org-id])))

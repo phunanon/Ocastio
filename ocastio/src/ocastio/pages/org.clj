@@ -8,12 +8,13 @@
 (defn split-by-whitespace [s]
   (clojure.string/split s #"\s+"))
 
-(defn make-org-link [{:keys [org_id name num-mem num-con num-pol img]}]
+(defn make-org-link [{:keys [org_id name desc num-mem num-con num-pol img]}]
   (v/li-link
     [:span.org
       [:img.small {:src img}]
       [:bl name] [:br]
-      [:stat "👥 " num-mem] [:stat "📜 " num-con] [:stat "📊 " num-pol]]
+      [:stat "👥 " num-mem] [:stat "📜 " num-con] [:stat "📊 " num-pol]
+      [:br] (if desc [:span.dark desc])]
     (str "/org/" org_id)))
 
 (defn make-con-link [{:keys [con_id title desc is_exec]}]
@@ -39,6 +40,7 @@
         cons    (db/con-infos org-id)
         polls   (db/ballot-infos org-id)]
     (compose name nil
+      [:img.small {:src img}]
       [:h2 name [:grey " | Organisation"]]
       [:p [(if admin? :a :span)
         {:href (str "/org/mems/" org-id)}

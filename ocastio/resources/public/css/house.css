@@ -26,7 +26,8 @@ a, a:visited, bl, .bl {
 	text-decoration: none;
 }
 
-grey { color: #aaa; }
+grey, .grey { color: #aaa; }
+dark, .dark { color: #666; }
 
 quote {
 	background-color: #edf;
@@ -45,6 +46,7 @@ li {
 	list-style: none;
 	background-color: #eeee;
 	color: #000;
+	position: relative;
 }
 
 table th {
