@@ -30,17 +30,12 @@
     [:p "These are all the organisations registered with Ocastio. " [:a {:href "/org/new"} "Register your own."]]
     [:ul (map make-org-link (db/orgs-stats))]))
 
-;TODO: destructuring and general improvement
-(defn org-page [request compose]
-  (let [session (:session request)
-        org-id  (get-in request [:route-params :org_id])
-        org-id  (Integer. org-id)
-        email   (:email session)
-        admin?  (db/org-admin? org-id email)
-        info    (db/org-info org-id)
-        name    (:name info)
-        members (:members info)
-        desc    (:desc info)
+(defn org-page [{{:keys [org-id]} :params 
+                 {:keys [email]}  :session}
+                compose]
+  (let [admin?  (db/org-admin? org-id email)
+        {:keys [name desc contact img members]}
+          (db/org-info org-id)
         cons    (db/con-infos org-id)
         polls   (db/ballot-infos org-id)]
     (compose name nil
@@ -56,7 +51,13 @@
             [:p "Adopt or remove a Constitution by ID or Ocastio URL:"]
             [:input {:name "con-id" :placeholder "e.g. 7 or .../con/7"}]
             [:input {:type "submit" :name "adopt" :value "Adopt"}]
-            [:input {:type "submit" :name "remove" :value "Remove"}]]])
+            [:input {:type "submit" :name "remove" :value "Remove"}]]
+          [:form {:action (str "/org/info/" org-id) :method "POST"}
+            (util/anti-forgery-field)
+            [:input {:name "name" :placeholder "Org name"        :maxlength 48  :value name}]
+            [:input {:name "desc" :placeholder "Org description" :maxlength 128 :value desc}]
+            [:input {:name "cont" :placeholder "Org contact"     :maxlength 48  :value contact}]
+            [:input {:type "submit" :value "Change info"}]]])
       [:h3 "Constitutions"]
         (if admin? [:p.admin [:a {:href (str "/con/new/" org-id)} "New constitution"]])
         (if (empty? cons) [:p "Not a member of any constitutions."])
@@ -81,6 +82,11 @@
           [:input {:type "submit" :name "dorem" :value "Remove members"}]]
       [:ul
         (map str (db/org-mems org-id))])))
+
+(defn set-info! [{{:keys [org-id name desc cont]} :params
+                  sess :session}]
+  (db/org-info! org-id name desc cont)
+  {:redir (str "/org/" org-id) :sess sess})
 
 (defn page-new [request compose]
   (compose "New Organisation" nil

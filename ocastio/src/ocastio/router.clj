@@ -42,8 +42,7 @@
   :law-new  [law/page-new   con-exec?]
   :ballots  [bal/page-all   no-auth]
   :bal-new  [bal/page-new   con-exec?]
-  :ballot   [bal/page       no-auth]
-})
+  :ballot   [bal/page       no-auth]})
 
 (defn page [{:keys [params session uri] :as request} where]
   (if (contains? pages where)
@@ -59,11 +58,12 @@
 
 
 (def posts {
-            ;maker          auth func
+  ;doer           auth func
   :sign     [sig/sign!      no-auth]
   :signout  [sig/signout    no-auth]
   :org-new  [org/new!       signed?]
-  :org-mem  [org/mod-mems!  org-admin?]
+  :org-mems [org/mod-mems!  org-admin?]
+  :org-info [org/set-info!  org-admin?]
   :pol-new  [vot/new-pol!   org-admin?]
   :con-new  [con/new!       org-admin?]
   :con-mem  [con/add-mem!   signed?]
@@ -72,8 +72,7 @@
   :law-del  [law/del!       law-exec?]
   :bal-new  [vot/new-bal!   con-exec?]
   :bal-del  [vot/del!       signed?]
-  :vote     [vot/vote!      signed?]
-})
+  :vote     [vot/vote!      signed?]})
 
 ;TODO: make :sess optional for doer's
 (defn do-action [{:keys [params session referer] :as request} what]
