@@ -77,7 +77,7 @@
       [:p.admin "Administrative section for " (v/org-link org-id name) "."]
       [:h2 "Members Management"]
       [:p "Provide user emails below, one per line. Add ! at the start of emails to make them admins."]
-        [:form {:action (str "/org/mod-mem/" org-id) :method "POST"}
+        [:form {:action (str "/org/mems/" org-id) :method "POST"}
           (util/anti-forgery-field)
           [:textarea {:name "emails"}]
           [:input {:type "submit" :name "doadd" :value "Add members"}]
