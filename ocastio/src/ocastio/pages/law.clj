@@ -15,6 +15,7 @@
         body        (if (= body "") "No body." body)
         parent-name (:title (db/law-info parent_id))
         children    (db/law-children law-id)
+        ballots     (db/law-ballots law-id nil)
         is-exec     (db/con-exec? con_id email)
         btn-new     #(vector :a {:href (str "/law/new/" con_id "/" %)} %2)]
   (compose title nil
@@ -22,14 +23,17 @@
       (if parent_id [:span " A child of " [:a {:href (str "/law/" parent_id)} parent-name] "."])]
     [:h2 title [:grey " | Law"]]
     [:quote [:pre body]]
-  (if (not-empty children) [:h3 "Children"])
-  (if is-exec
-    [:p.admin
-      (btn-new law-id "Compose a child law") " or "
-      (btn-new (if parent_id parent_id "0") "a sibling law")])
-  (if is-exec
-    (v/make-del-button (str "/law/del/" law-id) "law"))
-  [:ul (map v/make-law-link children)])))
+    [:h3 "Children"]
+    (if is-exec
+      [:p.admin
+        (btn-new law-id "Compose a child law") " or "
+        (btn-new (if parent_id parent_id "0") "a sibling law")])
+    (if (empty? children) [:p "This law has no child laws."])
+    [:ul (map v/make-law-link children)]
+    [:h3 "Ballots"]
+    [:ul (map #(v/li-link (:title %) (str "/ballot/" (:ballot_id %))) ballots)]
+    (if is-exec
+      (v/make-del-button (str "/law/del/" law-id) "law")))))
 
 (defn page-new [{{:keys [uri parent-id con-id]} :params} compose]
   (let [parent-id   (Integer. parent-id)

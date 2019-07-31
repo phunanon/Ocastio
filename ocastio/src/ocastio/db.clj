@@ -181,14 +181,17 @@ WHERE org2user.is_admin AND org2con.is_exec
 (defn con-laws [con-id]
   (jdbc/query db-spec ["SELECT law.law_id, title, body, parent_id FROM law WHERE con_id = ?" con-id]))
 
-(defn law-latest-ballot [law-id]
-  (fvf (jdbc/query db-spec ["
-SELECT ballot.ballot_id FROM BALLOT
+(defn law-ballots [law-id limit]
+  (jdbc/query db-spec [(str "
+SELECT ballot.ballot_id, title FROM BALLOT
 JOIN bal_opt ON bal_opt.ballot_id = ballot.ballot_id
 WHERE DateAdd(hour, hours, start) < CURRENT_TIMESTAMP
   AND bal_opt.law_id = ?
 ORDER BY DateAdd(hour, hours, start) DESC
-LIMIT 1" law-id])))
+" limit) law-id]))
+
+(defn law-latest-ballot [law-id]
+  (fvf (law-ballots law-id "LIMIT 1")))
 
 (defn law-new! [con-id parent-id email title body]
   (let [user-id   (email->id email)
