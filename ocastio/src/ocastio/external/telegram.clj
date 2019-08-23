@@ -143,8 +143,7 @@
       (let [{:keys [title desc type is-poll start hours sco_range] :as bal-info}
               (ballot-info ballot-id)
             options     (map :opt_id (bal-opts bal-info))
-            text        (str/lower-case text)
-            text        (map #(or ({"y" "1" "n" "0" "a" "abstain"} %) %) text)
+            text        (map #(or ({"y" "1" "n" "0" "a" "abstain"} (str/lower-case %)) %) text)
             choices     (map edn/read-string (drop 2 text))
             is-abstain  (= (first choices) 'abstain)
             is-valid
