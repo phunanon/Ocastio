@@ -1,0 +1,20 @@
+
+
+    openssl pkcs12 -export -in fullchain.pem -inkey privkey.pem -out cert.pkcs12
+
+I now specify a password (x), twice, when prompted.
+
+Next step:
+
+    keytool -importkeystore -destkeystore keystore.test -srckeystore cert.pkcs12 -srcstoretype PKCS12
+
+I now specify a keystore password (y), twice, when prompted, and the source keystore password (x) when prompted.
+
+In the Jetty config file (jetty.xml), I specify the passwords x and y like so:
+
+    <Set name=“Keystore”><Property name=“jetty.home” default="." />/keystore.test</Set>
+    <Set name=“Password”>y</Set>
+    <Set name=“KeyPassword”>x</Set>
+
+
+https://community.letsencrypt.org/t/how-to-get-certificates-into-java-keystore/25961/18

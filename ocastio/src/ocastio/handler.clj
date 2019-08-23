@@ -1,6 +1,4 @@
 (ns ocastio.handler
-  (:use
-    [ring.middleware.gzip])
   (:require
     [ocastio.router :as rou]
     [ocastio.db :as db]
@@ -8,6 +6,7 @@
     [compojure.core :refer :all]
     [compojure.route :as route]
     [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
+    [ring.middleware.ssl :refer [wrap-ssl-redirect]]
     [ring.util.response :as resp]))
 
 ;TODO _ -> -, poll -> pol, ballot -> bal
@@ -50,9 +49,10 @@
 (defn wrap-cache [handler]
   #((assoc-in (handler %) [:headers "Cache-Control"] "max-age=604800, public")))
 
-(def app (-> app-routes
+(def app
+  (-> app-routes
     (wrap-defaults site-defaults)
-    (wrap-gzip)))
+    (wrap-ssl-redirect))) ;Comment out when debugging locally
 
 (tele/start)
 
