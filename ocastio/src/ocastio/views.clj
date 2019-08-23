@@ -97,7 +97,7 @@
           (db/method-info method_id)
         facts [(if is-num-win
                  (str num_win "/" num_opt " win")
-                 (str majority "% win"))
+                 (str ">" majority "% win"))
                (if is-score (str "0-" (dec sco_range) " range"))
                (if preresult "early results")]
         facts (filter some? facts)
