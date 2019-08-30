@@ -68,6 +68,9 @@
         (if admin? [:p.admin [:a {:href (str "/poll/new/" org-id)} "New poll"]])
         (v/make-ballot-links polls "poll"))))
 
+(defn make-mem-row [{:keys [email date is_admin]}]
+  [:tr [:td email] [:td (v/format-inst date)] [:td is_admin]])
+
 (defn page-mems [{{:keys [org-id]} :params
                   {:keys [email]}  :session}
                  compose]
@@ -82,8 +85,9 @@
           [:textarea {:name "emails"}]
           [:input {:type "submit" :name "doadd" :value "Add members"}]
           [:input {:type "submit" :name "dorem" :value "Remove members"}]]
-      [:ul
-        (map str (db/org-mems org-id))])))
+      (vector :table [:tr [:th "Email"] [:th "Date joined"] [:th "Admin?"]]
+        (map make-mem-row
+          (reverse (db/org-mems org-id)))))))
 
 (defn set-info! [{{:keys [org-id name desc cont]} :params
                   sess :session}]
