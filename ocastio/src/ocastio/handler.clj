@@ -6,6 +6,7 @@
     [compojure.core :refer :all]
     [compojure.route :as route]
     [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
+    [ring.middleware.gzip :refer [wrap-gzip]]
     [ring.middleware.ssl :refer [wrap-ssl-redirect]]
     [ring.util.response :as resp]))
 
@@ -52,6 +53,7 @@
 (def app
   (-> app-routes
     (wrap-defaults site-defaults)
+    (wrap-gzip);))
     (wrap-ssl-redirect))) ;Comment out when debugging locally
 
 (tele/start)

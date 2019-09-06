@@ -11,6 +11,7 @@
                  [ring/ring-mock "0.3.2"]
                  [hiccup "1.0.5"]
                  [org.clojure/java.jdbc "0.6.0"]
+                 [bk/ring-gzip "0.3.0"]
                  [ring/ring-ssl "0.3.0"]
                  [com.h2database/h2 "1.4.193"]
                  [pandect "0.6.1"]
