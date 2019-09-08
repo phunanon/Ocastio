@@ -124,9 +124,8 @@
   (map
     (fn [[state ballots]]
       [:ul
-        [:h4 (str/capitalize (name state))]
-        (if (empty? ballots)
-          [:p "No ballots in this period."]
+        [:h4 (str/capitalize (name state)) " (" (count ballots) ")"]
+        (if (some? ballots)
           (map #(make-ballot-link % type) ballots))])
     triage)))
 

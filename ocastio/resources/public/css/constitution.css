@@ -24,13 +24,13 @@ tree > leaf:before {
 	width: 100%;
 }
 
-leaf leaftitle {
+leaftitle {
 	display: inline-block;
 	margin: .5rem .5rem 0 .5rem;
 	padding: .25rem;
 	max-width: calc(100% - 7rem);
 }
-leaf leafvotes {
+.leafapp {
 	display: inline-block;
 	padding: .2rem;
 	margin: .5rem;
@@ -39,34 +39,19 @@ leaf leafvotes {
 	right: 0;
 	position: absolute;
 }
-leaf description {
+leafdesc {
 	display: block;
 	font-size: .75rem;
-	background-color: white;
-	border: .1rem solid #000;
 	margin: .5rem;
 	padding: .1rem;
 }
-leaf description.none {
+leafdesc.none {
 	border: none;
 	padding: 0;
 }
 
-leaf forbar {
-	display: block;
-	height: 100%;
-	background-color: #0f0;
-	border-right: .1rem solid #000;
-}
-leaf votebar {
-	display: block;
-	height: .5rem;
-	background-color: #f00;
-	border-bottom: .1rem solid #000;
-}
-
-leaf leafvotes.out {
-	background-color: #fcc;
+leaf .leafapp.out {
+	background-color: #fee;
 }
 leaf leaftitle:before {
 	content: "";

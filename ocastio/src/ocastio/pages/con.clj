@@ -49,24 +49,19 @@
   {:redir "/orgs" :sess sess})
 
 
-(defn vote-bar [vote%]
-  [:votebar [:forbar {:style (str "width: " (int vote%) "%")}]])
 
 (defn render-leaf [{:keys [approval won? law_id bal-id title body]} by-parent parent-active?]
   (let [active?      (and parent-active? won?)
         approval     (if approval (* approval 100) 0)]
   [:leaf
-    (vote-bar approval)
     [:a {:href (str "/law/" law_id)}
       [:leaftitle {:class (if active? "in" "out")} title]]
-    [:leafvotes
-      {:class (if won? "in" "out")}
-      (if bal-id
-        [:span
-          (format "%.2f%%" approval)
-          " " [:a {:href (str "/ballot/" bal-id)} "🔗"]]
-        "nil")]
-    [(if (= body "") :description.none :description) [:pre body]]
+    (if bal-id
+      [:a.leafapp
+        {:class (if won? "in" "out")
+         :href  (str "/ballot/" bal-id)}
+        (format "%.2f%%" approval)])
+    [(if (= body "") :leafdesc.none :leafdesc) [:pre body]]
     (map #(render-leaf % by-parent active?)
           (by-parent law_id))]))
 
