@@ -8,7 +8,7 @@
 
 (def stats [
   ["votes"          (db/num-votes)]
-  ["ballots/polls"  (num-rec :ballot)]
+  ["ballots"        (num-rec :ballot)]
   ["laws"           (num-rec :law)]
   ["users"          (num-rec :user)]
   ["organisations"  (num-rec :org)]
@@ -25,7 +25,7 @@
            [:div#stats (gen-stats)]
            [:h2 "Welcome"]
            [:p [:b "Ocastio enables organisations to post ballots and compose constitutions."]]
-           [:p "Flexibility is at heart. Organisations can adopt constitutions, as executives or members, allowing seperate bodies fine-grain control over their legislation. You can use the same voting systems to post referenda/polls to organisational members."]
+           [:p "Flexibility is at heart. Organisations can adopt constitutions, as executives or members, allowing separate bodies fine-grain control over their legislation. You can use the same voting systems to post referenda/polls to organisational members."]
            [:p "Organisations implement and interpret the spirit & letter of their legislation, Ocastio offering the platform and management."]
            [:p "There is a " [:a {:href "https://telegram.org"} "Telegram"] " bot you can add called " [:a {:href "https://t.me/OcastioBot"} "@OcastioBot"] ", which enables voting, viewing information, and seeing which ballots you personally have to vote on."]
            [:warning
