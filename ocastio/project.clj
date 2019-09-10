@@ -24,6 +24,9 @@
   :profiles {
     :dev {}
     :prod {
+      :aot :all
+      :clean-targets ^{:protect false} ["/tmp/target"]
+      :target-path "/tmp/target"
       :ring {
         :port 80
         :ssl? true
