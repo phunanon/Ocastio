@@ -29,7 +29,8 @@ setInterval("UpdateValue('#days', 'day', '#day'); UpdateValue('#hours', 'hour', 
 //Poll related
 function OptionKey (e, that)
 {
-  switch (e.keyCode) {
+  const opt = e.keyCode != undefined ? e.keyCode : 13;
+  switch (opt) {
     case 13:
       AddOption(that);
       break;

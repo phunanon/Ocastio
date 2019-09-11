@@ -11,9 +11,14 @@
 
 (def option-form
   [:section#options
-    [:p "Press Enter to add another option, or Backspace in an empty option to delete."]
+    [:p "Press Enter or double click to add another option, or Backspace in an empty option to delete."]
     [:div#options
-      [:input {:type "text" :name "opt0" :placeholder "Option body" :onkeydown "return OptionKey(event, this)"}]]])
+      [:input {
+        :type "text"
+        :name "opt0"
+        :placeholder "Option body" 
+        :onkeydown "return OptionKey(event, this)"
+        :ondblclick "return OptionKey(event, this)"}]]])
 
 (defn page-new [{{:keys [org-id] :as para} :params} compose]
   (let [org-id         (Integer. org-id)
