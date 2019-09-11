@@ -10,19 +10,6 @@ leaf {
 	border: .1rem solid #000;
 	background-color: #f8f8f0;
 }
-leaf:before {
-	content: "";
-	position:absolute;
-	width: calc(100% - .8rem);
-	left: 0;
-	bottom: 0;
-	height: 100%;
-	box-shadow: -.2rem .2rem .1rem rgba(0,0,0,.25);
-	pointer-events: none;
-}
-tree > leaf:before {
-	width: 100%;
-}
 
 leaftitle {
 	display: inline-block;
