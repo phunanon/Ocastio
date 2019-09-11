@@ -201,6 +201,7 @@ ORDER BY DateAdd(hour, hours, start) DESC
     law-id))
 
 (defn law-del! [law-id]
+  (jdbc/delete! db-spec :law ["parent_id = ?" law-id]) ;TODO properly configure cascading deletion
   (jdbc/delete! db-spec :law ["law_id = ?" law-id]))
 
 (defn law-basic-info [law-id]
