@@ -69,7 +69,10 @@
         (v/make-ballot-links polls "poll"))))
 
 (defn make-mem-row [{:keys [email date is_admin]}]
-  [:tr [:td email] [:td (v/format-inst date)] [:td is_admin]])
+  [:tr
+    [:td email]
+    [:td (v/format-inst date)]
+    [:td (if is_admin "yes" "")]])
 
 (defn page-mems [{{:keys [org-id]} :params
                   {:keys [email]}  :session}
