@@ -37,10 +37,22 @@
       state)))
 
 (defn normalise-vals [hmap sco-range]
+"Forces scores in {opt score} into the accepted range"
   (zipmap
     (map key hmap)
-    (map #(if (> % sco-range) sco-range %)
-         (map val hmap))))
+    (map
+      #(if (> % sco-range)
+          sco-range
+          (if (< % 0) 0 %))
+      (map #(-> % val Integer.) hmap))))
+
+(defn all-opts-if-agree [ballot-id method-id {choice :opt-1} opts]
+  (if (and (<= 6 method-id 7)
+           choice)
+    (zipmap
+      (map :opt_id (db/bal-pol-options ballot-id))
+      (repeat choice))
+    opts))
 
 ; TODO check options are of ballot
 (defn vote! [{{:keys [ballot_id] :as para} :params
@@ -55,7 +67,8 @@
         is-abstain  (:abstain para)
         {:keys [is_score]}
           (db/method-info method_id)
-        opts        (if is_score (normalise-vals opts sco_range) opts)]
+        opts        (if is_score (normalise-vals opts sco_range) opts)
+        opts        (all-opts-if-agree ballot_id method_id para opts)]
     (if (= test-vote :authed)
       (db/vote-new! user-id ballot_id opts is-abstain))
     {:redir (str "/" type "/" ballot_id) :sess sess}))
@@ -78,22 +91,24 @@
     (map make-score-radio (range 0 score-range))
     [:span (v/make-option-text option)]])
 
+(defn make-mass-list [{:keys [opt_id text] :as option}]
+  [:balopt
+    [:span (v/make-option-text option)]])
+
 (defn make-option-form [options ballot-id method-id range]
     [:form#vote {:action (str "/vote/" ballot-id) :method "POST" :data-stv (= method-id 5)}
       (util/anti-forgery-field)
       [:br]
-      (let [check-in  make-check-input
-            score-in  (partial make-score-input range)
-            ranked-in (partial make-score-input (count options))]
-        (map
-          (case method-id
-            0 "n/a"
-            1 check-in
-            2 score-in
-            3 check-in
-            4 score-in
-            5 ranked-in)
-          options))
+      (let [fchk    make-check-input
+            fsco    (partial make-score-input range)
+            frnk    (partial make-score-input (count options))
+            flst    (partial make-mass-list)
+            per-opt ({1 fchk 2 fsco 3 fchk 4 fsco 5 frnk 6 flst 7 flst} method-id)]
+        (map per-opt options))
+      (if (= 6 method-id)
+        (make-check-input {:opt_id -1 :text "I agree with all options."}))
+      (if (= 7 method-id)
+        (make-score-input range {:opt_id -1 :text "I agree with all options."}))
       [:input {:type "submit" :value "Cast vote"}]
       [:input {:type "submit" :name "abstain" :value "Abstain"}]])
 

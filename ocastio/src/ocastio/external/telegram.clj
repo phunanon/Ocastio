@@ -140,24 +140,27 @@
   (let [{:keys [text ballot-id exists]}
           (parse-bal-cmd text)]
     (if exists
-      (let [{:keys [title desc type is-poll start hours sco_range] :as bal-info}
+      (let [{:keys [title desc method_id type is-poll start hours sco_range] :as bal-info}
               (ballot-info ballot-id)
             options     (map :opt_id (bal-opts bal-info))
             text        (map #(or ({"y" "1" "n" "0" "a" "abstain"} (str/lower-case %)) %) text)
             choices     (map edn/read-string (drop 2 text))
+            is-mass     (<= 6 method_id 7)
             is-abstain  (= (first choices) 'abstain)
             is-valid
               (if is-abstain
                 true
                 (and
-                  (= (count options) (count choices))
                   (every? int? choices)
-                  (every? #(< % sco_range) choices)))
+                  (not-any? neg? choices)
+                  (every? #(< % sco_range) choices)
+                  (= (count choices) (if is-mass 1 (count options)))))
             user-id     (db/contact->id (str "tg:" username))
             test-vote   (vote/test-vote bal-info user-id)
             reason      (test-vote->reason test-vote)
             state       (v/ballot-state bal-info)
-            link        (bal-link ballot-id title type)]
+            link        (bal-link ballot-id title type)
+            choices     (if is-mass (repeat (count options) (first choices)) choices)]
         (if is-valid
           (if (= test-vote :authed)
             (if is-abstain
