@@ -341,6 +341,7 @@ user_id = ? AND opt_id IN (SELECT opt_id FROM bal_opt WHERE ballot_id = ?)" user
   ;Conj 0-value or nil-value all-options hash-map with user choices
   (let [all-opts  (bal-pol-options ballot-id)
         blank     (if is-abstain nil 0)
+        choices   (if is-abstain {} choices)
         opt+blank (zipmap (map :opt_id all-opts) (repeat blank))
         choices   (conj opt+blank choices)]
     ;Insert new votes
