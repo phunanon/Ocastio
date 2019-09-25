@@ -91,9 +91,8 @@
     (map make-score-radio (range 0 score-range))
     [:span (v/make-option-text option)]])
 
-(defn make-mass-list [{:keys [opt_id text] :as option}]
-  [:balopt
-    [:span (v/make-option-text option)]])
+(defn make-mass-list [option]
+  [:balopt [:span (v/make-option-text option)]])
 
 (defn make-option-form [options ballot-id method-id range]
     [:form#vote {:action (str "/vote/" ballot-id) :method "POST" :data-stv (= method-id 5)}
@@ -102,7 +101,7 @@
       (let [fchk    make-check-input
             fsco    (partial make-score-input range)
             frnk    (partial make-score-input (count options))
-            flst    (partial make-mass-list)
+            flst    make-mass-list
             per-opt ({1 fchk 2 fsco 3 fchk 4 fsco 5 frnk 6 flst 7 flst} method-id)]
         (map per-opt options))
       (if (= 6 method-id)
