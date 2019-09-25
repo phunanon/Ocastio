@@ -33,5 +33,4 @@
         :ssl-port 443
         :keystore "keystore.jks"
         ;:key-password "abcd"}}})
-;lein with-profile prod ring uberjar
 ;https://community.letsencrypt.org/t/how-to-get-certificates-into-java-keystore/25961/18
