@@ -143,7 +143,7 @@
 
           Type      (if poll? "Poll" "Ballot")
           type      (str/lower-case Type)]
-      (compose (str title " | " Type) (h/include-js "/js/ballot.js")
+      (compose (str title " | " Type) (if (= method_id 5) (h/include-js "/js/stv.js"))
         (if poll?
           [:navinfo "Conducted by "  [:a {:href (str "/org/" org_id)} org-name] "."]
           [:navinfo "Conducted for " [:a {:href (str "/con/" con-id)} con-name] "."])
