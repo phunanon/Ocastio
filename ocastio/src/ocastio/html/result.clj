@@ -2,7 +2,10 @@
   (:require
     [ocastio.db      :as db]
     [ocastio.views   :as v]
-    [clojure.string :as str]))
+    [clojure.string :as str]
+    [clojure.core.cache.wrapped :as cw]))
+
+(defonce law-result-cache (cw/lru-cache-factory {} :threshold 1024))
 
 (defn ballot-results [ballot-id]
   (let [{:keys [title org_id method_id desc hours start
@@ -18,15 +21,20 @@
         results     (map assoc-won (sort-by :approval > results) (range))]
     results))
 
-(defn law-result [law-id]
-  (def ballot-id   (db/law-latest-ballot law-id))
+(defn calc-law-result [[law-id ballot-id]]
   (if ballot-id
-    (let [ballot-id   (db/law-latest-ballot law-id)
-          bal-results (ballot-results ballot-id)
+    (let [bal-results (ballot-results ballot-id)
           law-result  (first (filter #(= (:law_id %) law-id) bal-results))
           law-result  (assoc law-result :bal-id ballot-id)]
       law-result)
     nil))
+
+(defn law-result [law-id]
+  (let [ballot-id (db/law-latest-ballot law-id)
+        cache-key [law-id ballot-id]]
+    (if ballot-id
+      (cw/lookup-or-miss law-result-cache cache-key calc-law-result)
+      nil)))
 
 (defn make-result-row [{:keys [text law_id sum approval won?]}]
   [(if won? :tr.won :tr)

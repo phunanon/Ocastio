@@ -15,6 +15,7 @@
     [bk/ring-gzip "0.3.0"]
     [ring/ring-ssl "0.3.0"]
     [com.h2database/h2 "1.4.193"]
+    [org.clojure/core.cache "0.8.1"]
     [pandect "0.6.1"]
     [clj-time "0.15.0"]
     [morse "0.4.3"]]
