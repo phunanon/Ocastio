@@ -46,6 +46,8 @@
         {:href (str "/org/mems/" org-id)}
         members " " (v/plu "member" members)] "."]
       [:quote desc]
+      [:br]
+      [:quote.contact contact]
       (if admin?
         [:section.admin
           [:form {:action (str "/con/mem/" org-id "?redir=/org/" org-id) :method "POST"}

@@ -35,6 +35,9 @@ quote {
 	display: inline-block;
 	border-left: dotted;
 }
+quote.contact {
+	background-color: #efd;
+}
 
 ol {
 	padding-left: 1rem;
