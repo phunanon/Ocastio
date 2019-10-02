@@ -123,7 +123,7 @@
         triage  (map #(vector % (triage %)) [:ongoing :future :complete])]
   (map
     (fn [[state ballots]]
-      [:ul
+      [:ul.list
         [:h4 (str/capitalize (name state)) " (" (count ballots) ")"]
         (if (some? ballots)
           (map #(make-ballot-link % type) ballots))])

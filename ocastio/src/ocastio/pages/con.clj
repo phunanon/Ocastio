@@ -104,6 +104,7 @@
         num-act  (count (filter (comp true? :won?) all-laws))
         num-ina  (- (count all-laws) num-act)]
     (compose title (page/include-css "/css/constitution.css")
+    (page/include-js "/js/listload.js")
     (if is-exec [:p.admin "You are an admin of an executive organisation."])
     [:h2 title [:grey " | Constitution"]]
       [:quote desc]
