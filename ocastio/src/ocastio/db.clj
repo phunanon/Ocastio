@@ -67,7 +67,8 @@
         org-id  (jdbc/insert! db-spec :org
           {:name name :desc desc :contact contact :img "https://i.imgur.com/gzNZGyi.png"})
         org-id  (first (vals (first org-id)))]
-    (add-to-org! org-id user-id true)))
+    (add-to-org! org-id user-id true)
+    org-id))
 
 (defn orgs-stats []
   (jdbc/query db-spec ["

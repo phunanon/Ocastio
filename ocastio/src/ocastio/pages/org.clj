@@ -47,7 +47,7 @@
         members " " (v/plu "member" members)] "."]
       [:quote desc]
       [:br]
-      [:quote.contact contact]
+      (if (seq contact) [:quote.contact contact])
       (if admin?
         [:section.admin
           [:form {:action (str "/con/mem/" org-id "?redir=/org/" org-id) :method "POST"}
@@ -99,11 +99,12 @@
   (db/org-info! org-id name desc cont)
   {:redir (str "/org/" org-id) :sess sess})
 
-(defn page-new [request compose]
+(defn page-new [{{:keys [new-org-error]} :session} compose]
   (compose "New Organisation" nil
     [:p "Enter the details of your new organisation."]
     [:form {:action "/org/new" :method "POST"}
       (util/anti-forgery-field)
+      (if new-org-error [:b "Error: " new-org-error] "")
       [:input {:placeholder "Organisation name" :name "name"}]
       [:textarea {:name "desc" :placeholder "Organisation description"}]
       [:input {:name "contact" :placeholder "Contact link"}]
@@ -111,10 +112,10 @@
 
 (defn new! [{{:keys [name desc contact]} :params
              {:keys [email] :as sess}    :session}]
+  (def sess (dissoc sess :new-org-error))
   (if (db/org-name-exists? name)
-    {:redir "/org/new" :sess (into sess {:new-org-error :exists})}
-    (do (db/org-new! email name desc contact)
-        {:redir "/orgs" :sess sess})))
+    {:redir "/org/new" :sess (into sess {:new-org-error "Organisation already exists."})}
+    {:redir (str "/org/" (db/org-new! email name desc contact)) :sess sess}))
 
 (defn mod-mems! [{{:keys [org-id emails doadd dorem]} :params
                   {:keys [email] :as sess}            :session}]

@@ -36,7 +36,7 @@ function OptionKey (e, that)
       break;
     case 8:
       if (that.value.length == 0) {
-        if (that.previousSibling !== null && that.previousSibling.previousSibling !== null)
+        if (that.previousSibling !== null)
           RemoveOption(that);
       } else return true;
     break;

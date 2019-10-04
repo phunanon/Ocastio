@@ -29,13 +29,12 @@
            [:p "Organisations implement and interpret the spirit & letter of their legislation, Ocastio offering the platform and management."]
            [:p "There is a " [:a {:href "https://telegram.org"} "Telegram"] " bot you can add called " [:a {:href "https://t.me/OcastioBot"} "@OcastioBot"] ", which enables voting, viewing information, and seeing which ballots you personally have to vote on."]
            [:warning
-            [:p "This website is in early development. Everything is liable to break or be incomplete; sessions may terminate unexpectedly; data may be lost (including your account); the website may go offline for indefinite periods."]
-            [:p "Currently unsupported voting systems:"]
+            [:p "Ocastio is in development. There may be bugs and the website may go offline for short periods. Currently unsupported voting systems:"]
             [:ul
              [:li "Single Transferable - N options approved by transferred totals."]]
              [:p "Email phunanon @ gmail.com if you need to get in touch!"]]
            [:h3 "Sponsors"]
-           [:p "Early adopters of Ocastio are being sponsored for one year."]
+           [:b "Early adopters of Ocastio are being sponsored for one year."]
            [:ul (map #(v/li-link [:span [:bl (% 0)] ", " [:span (% 1)]] (% 2)) early)]
            [:h3 "The Platform"]
            [:ul
