@@ -100,7 +100,6 @@ Remember, in the future you can create ballots for parent laws, and depending on
 
 (defn recur-imp!
   ([laws info]
-    (println laws)
     (recur-imp! laws info [0]))
   ([laws {:keys [email con-id] :as info} parents]
     (let [[{:keys [level title body] :as law}]

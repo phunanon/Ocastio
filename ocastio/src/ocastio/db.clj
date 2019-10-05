@@ -45,9 +45,11 @@
     (= (seq rehash) (seq pass))))
 
 (defn new-user! [email password]
-  (let [salt  (sha256-bytes (str (.getTime (java.util.Date.))))
-        pass  (hashpass password salt)]
-    (jdbc/insert! db-spec :user {:email email :pass pass :salt salt})))
+  (let [salt    (sha256-bytes (str (.getTime (java.util.Date.))))
+        pass    (hashpass password salt)
+        user-id (jdbc/insert! db-spec :user {:email email :pass pass :salt salt})
+        user-id (fvf user-id)]
+    (jdbc/insert! db-spec :org2user {:org_id 1 :user_id user-id})))
 
 (defn set-user-contact! [email contact]
   (jdbc/update! db-spec :user {:contact contact} ["email = ?" email]))
@@ -66,7 +68,7 @@
   (let [user-id (email->id email)
         org-id  (jdbc/insert! db-spec :org
           {:name name :desc desc :contact contact :img "https://i.imgur.com/gzNZGyi.png"})
-        org-id  (first (vals (first org-id)))]
+        org-id  (fvf org-id)]
     (add-to-org! org-id user-id true)
     org-id))
 
