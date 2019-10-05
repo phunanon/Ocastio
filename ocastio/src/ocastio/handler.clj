@@ -37,6 +37,8 @@
   (GET  "/law/:law-id"                req (rou/page req :law))
   (GET  "/law/new/:con-id/:parent-id" req (rou/page req :law-new))
   (POST "/law/new/:con-id/:parent-id" req (rou/post req :law-new))
+  (GET  "/law/imp/:con-id"            req (rou/page req :law-imp))
+  (POST "/law/imp/:con-id"            req (rou/post req :law-imp))
   (POST "/law/del/:law-id"            req (rou/post req :law-del))
   (GET  "/ballots"                    req (rou/page req :ballots))
   (GET  "/ballot/new/:con-id"         req (rou/page req :bal-new))

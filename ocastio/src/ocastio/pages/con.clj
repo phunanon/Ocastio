@@ -129,6 +129,8 @@
     [:h3 "Laws"]
       (if is-exec
         [:p.admin [:a {:href (str "/law/new/" con-id "/0")} "Compose a new law"]])
+      (if is-exec
+        [:p.admin [:a {:href (str "/law/imp/" con-id)} "Import new law"]])
       [:p num-act " active, " num-ina " inactive."]
       (render-laws all-laws)
     [:br]

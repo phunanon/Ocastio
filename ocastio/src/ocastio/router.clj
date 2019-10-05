@@ -40,6 +40,7 @@
   :con-new  [con/page-new   org-admin?]
   :law      [law/page       no-auth]
   :law-new  [law/page-new   con-exec?]
+  :law-imp  [law/page-imp   con-exec?]
   :ballots  [bal/page-all   no-auth]
   :bal-new  [bal/page-new   con-exec?]
   :ballot   [bal/page       no-auth]})
@@ -69,6 +70,7 @@
   :con-mem  [con/add-mem!   signed?]
   :con-del  [con/del!       con-exec?]
   :law-new  [law/new!       con-exec?]
+  :law-imp  [law/import!    con-exec?]
   :law-del  [law/del!       law-exec?]
   :bal-new  [vot/new-bal!   con-exec?]
   :bal-del  [vot/del!       signed?]
