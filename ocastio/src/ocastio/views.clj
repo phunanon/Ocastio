@@ -120,7 +120,8 @@
 (defn make-ballot-links [ballots type]
   (let [ballots (map #(assoc % :state (ballot-state %)) ballots)
         triage  (group-by :state ballots)
-        triage  (map #(vector % (triage %)) [:ongoing :future :complete])]
+        triage  (map #(vector % (triage %)) [:ongoing :future :complete])
+        triage  (filter #(seq (second %)) triage)]
   (map
     (fn [[state ballots]]
       [:ul.list

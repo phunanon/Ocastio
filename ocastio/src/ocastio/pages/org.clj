@@ -45,7 +45,7 @@
       [:p [(if admin? :a :span)
         {:href (str "/org/mems/" org-id)}
         members " " (v/plu "member" members)] "."]
-      [:quote desc]
+      (if (seq desc) [:quote desc])
       [:br]
       (if (seq contact) [:quote.contact contact])
       (if admin?

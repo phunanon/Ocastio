@@ -6,6 +6,10 @@
     [clojure.string :as str]
     [ring.util.anti-forgery :as util]))
 
+(defn con-link [con-id]
+  [:a {:href (str "/con/" con-id)}
+      (:title (db/con-info con-id))])
+
 (defn page [{{:keys [law-id]} :params
              {:keys [email]}  :session}
             compose]
@@ -37,13 +41,9 @@
 
 (defn page-new [{{:keys [uri parent-id con-id]} :params} compose]
   (let [parent-id   (Integer. parent-id)
-        parent-name (:title (db/law-basic-info parent-id))
-        con-id      (Integer. con-id)
-        con-info    (db/con-info con-id)
-        con-name    (:title con-info)
-        con-link    (str "/con/" con-id)]
+        parent-name (:title (db/law-basic-info parent-id))]
     (compose "New law" nil
-      [:p "Enter the details of the new law, for " [:a {:href con-link} con-name] "."]
+      [:p "Enter the details of the new law, for " (con-link con-id) "."]
       [:form {:action uri :method "POST"}
         (util/anti-forgery-field)
         [:p [:b "Parent: "]
@@ -63,8 +63,7 @@
         law-id    (db/law-new! con-id parent-id email title body)]
   {:redir (str "/law/" law-id) :sess sess}))
 
-(defn del! [{{:keys [law-id]} :params
-             sess             :session}]
+(defn del! [{{:keys [law-id]} :params sess :session}]
   (let [{:keys [con_id]} (db/law-basic-info law-id)]
     (db/law-del! law-id)
     {:redir (str "/con/" con_id) :sess sess}))
