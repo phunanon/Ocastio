@@ -71,7 +71,7 @@
       [:p (if email email "Online democracy")]]
     [:div
       (nav-link "Organisations" "/orgs")
-      ;(nav-link "Constitutions" "/cons")
+      (nav-link "Constitutions" "/cons")
       ;(nav-link "Ballots" "/ballots")
       (if email
         (nav-link "Sign out" (str "/signout?ref=" uri))

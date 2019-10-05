@@ -13,7 +13,7 @@
     [:span.org
       [:img.small {:src img}]
       [:bl name] [:br]
-      [:stat "👥 " num-mem] [:stat "📜 " num-con] [:stat "📊 " num-pol]
+      [:stat "👤 " num-mem] [:stat "📜 " num-con] [:stat "📊 " num-pol]
       [:br] (if desc [:span.dark desc])]
     (str "/org/" org_id)))
 
@@ -22,7 +22,7 @@
     [:span
       (if is_exec "Executive" "Member") " of " [:bl title]
       [:br]
-      [:span "\"" desc "\""]]
+      [:span desc]]
     (str "/con/" con_id)))
 
 

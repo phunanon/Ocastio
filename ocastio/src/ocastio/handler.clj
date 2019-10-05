@@ -16,6 +16,7 @@
   (GET  "/signin"                     req (rou/page req :signin))
   (POST "/sign"                       req (rou/post req :sign))
   (GET  "/signout"                    req (rou/post req :signout))
+  (GET  "/cons"                       req (rou/page req :cons))
   (GET  "/orgs"                       req (rou/page req :orgs))
   (GET  "/org/new"                    req (rou/page req :org-new))
   (POST "/org/new"                    req (rou/post req :org-new))

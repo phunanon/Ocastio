@@ -111,6 +111,9 @@ WHERE org_id = ?" org-id]))
       (boolean)))
 
 
+(defn cons-infos []
+  (jdbc/query db-spec ["SELECT con.con_id, title, desc FROM con"]))
+
 (defn orgs-by-con [con-id]
   (:org_id (first (jdbc/query db-spec ["SELECT * FROM org2con WHERE con_id = ?" con-id]))))
 
@@ -147,6 +150,13 @@ WHERE org_id = ?" org-id]))
 
 (defn con-info [con-id]
   (first (jdbc/query db-spec ["select con_id, title, desc from con where con_id = ?" con-id])))
+
+(defn con-num-org [con-id]
+  (fvf (jdbc/query db-spec ["
+SELECT COUNT(org.org_id)
+FROM org
+JOIN org2con ON org2con.org_id = org.org_id
+WHERE org2con.con_id = ?" con-id])))
 
 (defn con-orgs-info [con-id]
   (jdbc/query db-spec ["
@@ -269,6 +279,16 @@ SELECT opt_id, text FROM bal_opt WHERE ballot_id = ?" ballot-id]))
 SELECT opt_id, law.law_id, law.title FROM bal_opt
 JOIN law ON law.law_id = bal_opt.law_id
 WHERE ballot_id = ?" ballot-id]))
+
+(defn con-num-ballots [con-id]
+  (fvf (jdbc/query db-spec ["
+SELECT COUNT(*) FROM (SELECT ballot.ballot_id
+FROM ballot
+JOIN method   ON method.method_id = ballot.method_id
+JOIN bal_opt  ON bal_opt.ballot_id  = ballot.ballot_id
+JOIN law      ON law.law_id         = bal_opt.law_id
+WHERE law.con_id = ?
+GROUP BY ballot.ballot_id)" con-id])))
 
 (defn con-ballots [con-id]
   (jdbc/query db-spec ["

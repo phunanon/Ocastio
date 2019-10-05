@@ -2,10 +2,7 @@ const e = (el) => document.querySelector(el);
 
 function UpdatePreview () {
   const importTxt = "\n"+ e("textarea").value;
-  const lawsTxt =
-    importTxt
-    .split("\n#")
-    .filter(l => l != "");
+  const lawsTxt = importTxt.split("\n#").filter(l => l != "");
 
   const laws = [];
   for (let l = 0; l < lawsTxt.length; ++l) {

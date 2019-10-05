@@ -126,7 +126,7 @@ textarea.big {
 	height: 10rem;
 }
 
-.org stat {
+.org stat, .con stat {
 	display: inline-block;
 	width: 3rem;
 }

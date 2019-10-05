@@ -8,6 +8,28 @@
     [hiccup.page :as page]
     [ring.util.anti-forgery :as util]))
 
+(defn make-con-stats-link [{:keys [con_id title desc num-bal num-mem num-org] :as info}]
+  (v/li-link
+    [:span.con
+      [:stat "👤 " num-mem] [:stat "👥 " num-org] [:stat "📊 " num-bal] [:bl title]
+      [:br]
+      [:span desc]]
+    (str "/con/" con_id)))
+
+(defn supplement-con-info [{:keys [con_id] :as con-info}]
+  (into con-info
+    {:num-bal (db/con-num-ballots con_id)
+     :num-mem (db/con-num-mem con_id)
+     :num-org (db/con-num-org con_id)}))
+
+(defn cons-page [request compose]
+  (let [all-cons (db/cons-infos)
+        all-cons (map supplement-con-info all-cons)
+        all-cons (sort-by :num-mem > all-cons)]
+  (compose "Organisations" nil
+    [:p "These are all the constitutions hosted on Ocastio. "]
+    [:ul (map make-con-stats-link all-cons)])))
+
 (defn page-new [{{:keys [org-id]} :params uri :uri} compose]
   (let [{:keys [name]} (db/org-info org-id)]
     (compose "New constitution" nil
@@ -90,12 +112,11 @@
 (defn page [{{:keys [con-id]} :params
              {:keys [email]}  :session}
              compose]
-  (let [con-id    (Integer. con-id)
-        orgs      (db/con-orgs-info con-id)
-        laws      (db/con-laws con-id)
+  (let [orgs     (db/con-orgs-info con-id)
+        laws     (db/con-laws con-id)
         {:keys [title desc]}
           (db/con-info con-id)
-        num-mem   (db/con-num-mem con-id)
+        num-mem  (db/con-num-mem con-id)
         is-exec  (db/con-exec? con-id email)
 
         ballots  (db/con-ballots con-id)
@@ -107,7 +128,7 @@
     (page/include-js "/js/listload.js")
     (if is-exec [:p.admin "You are an admin of an executive organisation."])
     [:h2 title [:grey " | Constitution"]]
-      [:quote desc]
+      (if (seq desc) [:quote desc])
       [:p "In total, " [:b num-mem] " people are affected by this constitution."]
     [:h3 "Oraganisations"]
     (if is-exec

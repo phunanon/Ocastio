@@ -30,6 +30,7 @@
             ;maker          auth func
   :home     [hom/page       no-auth]
   :signin   [sig/page       no-auth]
+  :cons     [con/cons-page  no-auth]
   :orgs     [org/orgs-page  no-auth]
   :org-new  [org/page-new   signed?]
   :org      [org/org-page   no-auth]
