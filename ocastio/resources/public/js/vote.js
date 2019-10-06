@@ -1,4 +1,5 @@
 const e = (el) => document.querySelector(el);
+const es = (el) => document.querySelectorAll(el);
 const isPoll = document.title.includes("oll");
 const plural = (word, n) => n == 1 ? word : word +"s";
 
@@ -68,6 +69,10 @@ function RemoveOption (el)
     else
       el.nextSibling.focus();
     el.parentNode.removeChild(el)
+}
+function AddOptionLast () {
+  const lastOpt = Array.from(es("#options input")).pop();
+  AddOption(lastOpt);
 }
 
 
