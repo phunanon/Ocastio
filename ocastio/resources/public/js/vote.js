@@ -73,6 +73,7 @@ function RemoveOption (el)
 function AddOptionLast () {
   const lastOpt = Array.from(es("#options input")).pop();
   AddOption(lastOpt);
+  UpdateBallotDOM();
 }
 
 
