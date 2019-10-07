@@ -88,8 +88,10 @@ FROM org2user
 JOIN org ON org.org_id = org2user.org_id
 WHERE org.org_id = ?" org-id])))
 
-(defn org-info! [org-id name desc contact]
-  (jdbc/update! db-spec :org {:name name :desc desc :contact contact} ["org_id = ?" org-id]))
+(defn org-info! [org-id name desc contact img]
+  (jdbc/update! db-spec :org
+    {:name name :desc desc :contact contact :img img}
+    ["org_id = ?" org-id]))
 
 (defn org-basic-info [org-id]
   (first (jdbc/query db-spec ["SELECT org.name FROM org WHERE org.org_id = ?" org-id])))

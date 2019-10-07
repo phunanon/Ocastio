@@ -58,10 +58,13 @@
             [:input {:type "submit" :name "remove" :value "Remove"}]]
           [:form {:action (str "/org/info/" org-id) :method "POST"}
             (util/anti-forgery-field)
-            [:input {:name "name" :placeholder "Org name"        :maxlength 48  :value name}]
-            [:input {:name "desc" :placeholder "Org description" :maxlength 128 :value desc}]
-            [:input {:name "cont" :placeholder "Org contact"     :maxlength 48  :value contact}]
-            [:input {:type "submit" :value "Change info"}]]])
+            [:input {:name "name" :placeholder "Name"         :maxlength 48  :value name}]
+            [:input {:name "desc" :placeholder "Description"  :maxlength 128 :value desc}]
+            [:input {:name "cont" :placeholder "Contact info" :maxlength 48  :value contact}]
+            [:input {:name "img"  :placeholder "Image"        :maxlength 48  :value img}]
+            [:input {:type "submit" :value "Change info"}]
+            [:p "Please note: the image must be hosted on "
+              [:a {:href "https://imgur.com/upload"} "Imgur."]]]])
       [:h3 "Constitutions"]
         (if admin? [:p.admin [:a {:href (str "/con/new/" org-id)} "New constitution"]])
         (if (empty? cons) [:p "Not a member of any constitutions."])
@@ -94,9 +97,11 @@
         (map make-mem-row
           (reverse (db/org-mems org-id)))))))
 
-(defn set-info! [{{:keys [org-id name desc cont]} :params
-                  sess :session}]
-  (db/org-info! org-id name desc cont)
+(defn set-info! [{{:keys [org-id name desc cont img]} :params sess :session}]
+  (let [img (if (str/starts-with? img "https://i.imgur.com/")
+                img "https://i.imgur.com/gzNZGyi.png")
+        img (str/replace img #"(.+?)m*\.(png|jpg)$" "$1m.$2")]
+    (db/org-info! org-id name desc cont img))
   {:redir (str "/org/" org-id) :sess sess})
 
 (defn page-new [{{:keys [new-org-error]} :session} compose]
