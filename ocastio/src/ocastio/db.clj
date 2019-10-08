@@ -67,7 +67,7 @@
 (defn org-new! [email name desc contact]
   (let [user-id (email->id email)
         org-id  (jdbc/insert! db-spec :org
-          {:name name :desc desc :contact contact :img "https://i.imgur.com/gzNZGyi.png"})
+          {:name name :desc desc :contact contact :img "https://i.imgur.com/CbV74Q7.png"})
         org-id  (fvf org-id)]
     (add-to-org! org-id user-id true)
     org-id))

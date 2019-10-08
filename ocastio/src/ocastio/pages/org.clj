@@ -99,7 +99,7 @@
 
 (defn set-info! [{{:keys [org-id name desc cont img]} :params sess :session}]
   (let [img (if (str/starts-with? img "https://i.imgur.com/")
-                img "https://i.imgur.com/gzNZGyi.png")
+                img "https://i.imgur.com/CbV74Q7.png")
         img (str/replace img #"(.+?)m*\.(png|jpg)$" "$1m.$2")]
     (db/org-info! org-id name desc cont img))
   {:redir (str "/org/" org-id) :sess sess})
