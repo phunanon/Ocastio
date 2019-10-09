@@ -8,11 +8,14 @@
     [hiccup.page :as page]
     [ring.util.anti-forgery :as util]))
 
-(defn make-con-stats-link [{:keys [con_id title desc num-bal num-mem num-org] :as info}]
+(defn make-con-stats-link
+  [{:keys [con_id title desc num-bal num-mem num-org num-law] :as info}]
   (v/li-link
     [:span.con
-      [:stat "👤 " num-mem] [:stat "👥 " num-org] [:stat "📊 " num-bal] [:bl title]
+      [:stat "👤 " num-mem] [:stat "🏦 " num-org]
+      [:bl title]
       [:br]
+      [:stat "📜 " num-law] [:stat "📊 " num-bal]
       [:span desc]]
     (str "/con/" con_id)))
 
@@ -20,14 +23,15 @@
   (into con-info
     {:num-bal (db/con-num-ballots con_id)
      :num-mem (db/con-num-mem con_id)
-     :num-org (db/con-num-org con_id)}))
+     :num-org (db/con-num-org con_id)
+     :num-law (db/con-num-law con_id)}))
 
 (defn cons-page [request compose]
   (let [all-cons (db/cons-infos)
         all-cons (map supplement-con-info all-cons)
         all-cons (sort-by :num-mem > all-cons)]
-  (compose "Organisations" nil
-    [:p "These are all the constitutions hosted on Ocastio. "]
+  (compose "Constitutions" nil
+    [:p "These are all the constitutions hosted on Ocastio. Constitutions are collections of law which organisations can either be executive or non-voting members of. Ballots dictate active and inactive legislation."]
     [:ul (map make-con-stats-link all-cons)])))
 
 (defn page-new [{{:keys [org-id]} :params uri :uri} compose]

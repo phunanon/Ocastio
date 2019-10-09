@@ -180,6 +180,9 @@ JOIN org ON org.org_id = org2user.org_id
 JOIN org2con ON org2con.org_id = org.org_id
 WHERE org2con.con_id = ?" con-id])))
 
+(defn con-num-law [con-id]
+  (fvf (jdbc/query db-spec ["SELECT COUNT(*) FROM law WHERE con_id = ?" con-id])))
+
 (defn con-exec? [con-id email]
   "True if user is an executive of this conitution (when one of their orgs are executive)"
   (if (some nil? [con-id email])
