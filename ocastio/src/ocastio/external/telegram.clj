@@ -153,7 +153,7 @@
                 (and
                   (every? int? choices)
                   (not-any? neg? choices)
-                  (every? #(< % sco_range) choices)
+                  (every? #(<= % sco_range) choices)
                   (= (count choices) (if is-mass 1 (count options)))))
             user-id     (db/contact->id (str "tg:" username))
             test-vote   (vote/test-vote bal-info user-id)

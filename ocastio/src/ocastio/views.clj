@@ -70,7 +70,7 @@
       [:a {:href "/"} [:h1 "Ocastio"]]
       [:p (if email email "Online democracy")]]
     [:div
-      (nav-link "Organisations" "/orgs")
+      (nav-link "Orgs" "/orgs")
       (nav-link "Constitutions" "/cons")
       ;(nav-link "Ballots" "/ballots")
       (if email
@@ -98,7 +98,7 @@
         facts [(if is-num-win
                  (str num_win "/" num_opt " win")
                  (str ">" majority "% win"))
-               (if is-score (str "0-" (dec sco_range) " range"))
+               (if is-score (str "0-" sco_range " range"))
                (if preresult "early results")]
         facts (filter some? facts)
         facts (str/join ", " facts)]

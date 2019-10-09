@@ -41,9 +41,9 @@
   (zipmap
     (map key hmap)
     (map
-      #(if (> % sco-range)
-          sco-range
-          (if (< % 0) 0 %))
+      #(if (<= 0 % sco-range)
+          %
+          (if neg? 0 sco-range))
       (map #(-> % val Integer.) hmap))))
 
 (defn all-opts-if-agree [ballot-id method-id {choice :opt-1} opts]
@@ -80,16 +80,18 @@
     [:label {:for opt}]
     [:span (v/make-option-text option)]])
 
-(defn make-score-radio [value]
+(defn make-score-radio [value opt checked?]
   (def id (str \o opt value))
   [:span
-    [:input {:type "radio" :value value :name opt :id id}]
+    [:input {:type "radio" :value value :name opt :id id :checked checked?}]
     [:label {:for id} value]])
 (defn make-score-input [score-range {:keys [opt_id text] :as option}]
-  (def opt (str "opt" opt_id))
-  [:balopt
-    (map make-score-radio (range 0 score-range))
-    [:span (v/make-option-text option)]])
+  (let [opt (str "opt" opt_id)
+        half (quot score-range 2)]
+    [:balopt
+      (map #(make-score-radio % opt (= % half))
+           (range 0 (inc score-range)))
+      [:span (v/make-option-text option)]]))
 
 (defn make-mass-list [option]
   [:balopt [:span (v/make-option-text option)]])
@@ -189,12 +191,12 @@
           [:span "Number of winning laws/options: "]
           [:input#num_win {:name "num_win" :type "number" :value 1 :min 1 :max 16}]]
         [:p#majority.inline
-          [:span "Majority at "]
+          [:span "Majority beyond "]
           [:input#majority {:name "majority" :type "number" :value 50 :min 1 :max 100}]
           [:span "%"]]
         [:p#range.inline
           [:span "Score range between 0 and "]
-          [:input#range {:name "sco_range" :type "number" :value 5 :min 2 :max 16}]]
+          [:input#range {:name "sco_range" :type "number" :value 4 :min 2 :max 16 :step 2}]]
         [:p "Dates and times are UTC."]
         [:p.inline "Starting at"
           [:input {:type "date" :name "date" :value date-now}]
@@ -214,20 +216,28 @@
 
 
 (defn process-new!-post
-  [{:keys [title desc date time days hours method_id num_win sco_range majority preresult]}
+  [{:keys [title desc date time days hours method_id
+           num_win sco_range majority preresult]}
    {email :email}]
   "Browser [para sess] -> {:setting val}"
-  { :title      title
-    :desc       desc
-    :user_id    (db/email->id email)
-    :method_id  (Integer. method_id)
-    :num_win    (Integer. num_win)
-    :sco_range  (Integer. sco_range)
-    :majority   (Integer. majority)
-    :start
-      (tc/to-sql-time (f/parse (f/formatter "yyy-MM-dd HH:mm") (str date " " time)))
-    :hours      (+ (Integer. hours) (* (Integer. days) 24))
-    :preresult  (boolean preresult)})
+  (let [sco_range (Integer. sco_range)
+        sco_range (#(if (even? %) % (dec %)) sco_range)
+        sco_range (if (< 2 sco_range 16) sco_range 4)
+        majority  (Integer. majority)
+        majority  (if (< 1 majority 100) majority 50)]
+    { :title      title
+      :desc       desc
+      :user_id    (db/email->id email)
+      :method_id  (Integer. method_id)
+      :num_win    (Integer. num_win)
+      :sco_range  sco_range
+      :majority   majority
+      :start
+        (->> (str date " " time)
+          (f/parse (f/formatter "yyy-MM-dd HH:mm"))
+          (tc/to-sql-time))
+      :hours      (+ (Integer. hours) (* (Integer. days) 24))
+      :preresult  (boolean preresult)}))
 
 ;TODO is admin, no crash on empty times, >1 options, TODO find more things to do
 (defn new-pol! [{{:keys [org-id] :as para} :params sess :session}]
