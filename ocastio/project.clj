@@ -9,7 +9,6 @@
     [compojure "1.6.1"]
     [ring/ring-defaults "0.3.2"]
     [javax.servlet/servlet-api "2.5"]
-    [ring/ring-mock "0.3.2"]
     [hiccup "1.0.5"]
     [org.clojure/java.jdbc "0.6.0"]
     [bk/ring-gzip "0.3.0"]
@@ -18,7 +17,12 @@
     [org.clojure/core.cache "0.8.1"]
     [pandect "0.6.1"]
     [clj-time "0.15.0"]
-    [morse "0.4.3"]]
+    [morse "0.4.3" :exclusions [commons-io commons-codec]]
+    [org.suskalo/discljord "0.2.4" :exclusions [org.clojure/core.async org.clojure/tools.analyzer.jvm]]
+    ;https://github.com/ring-clojure/ring/issues/369#issuecomment-489028469
+    [org.eclipse.jetty/jetty-util "9.4.17.v20190418"]
+    [org.eclipse.jetty/jetty-http "9.4.17.v20190418"]
+    [org.eclipse.jetty/jetty-server "9.4.17.v20190418"]]
   :plugins [
     [lein-ring "0.12.5"]]
   :ring {:handler ocastio.handler/app}
