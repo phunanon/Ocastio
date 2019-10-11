@@ -11,15 +11,16 @@
     [clojure.core.async :refer [go <!]]))
 
 
-
-
-(defn cmd-help [text send-tx! _ _]
+(defn cmd-help [prefix text send-tx! _ _]
   (send-tx!
-    "/register email password\n  create and link an Ocastio account"
-    "\n/auth email password\n  link Telegram and Ocastio accounts"
-    "\n/info ballot-id\n  ballot/poll info"
-    "\n/mine\n  see ballots/polls you can vote on"
-    "\n/vote ballot-id 0-n ...\n  vote on ballots/polls. 0-n is the range, with 0-1 for approval voting."))
+    "How to use this bot:"
+    (apply str
+      (map #(str "\n" prefix %)
+        ["register email password\n  create and link an Ocastio account"
+         "auth email password\n  link Telegram and Ocastio accounts"
+         "info ballot-id\n  ballot/poll info"
+         "mine\n  see ballots/polls you can vote on"
+         "vote ballot-id 0-n ...\n  vote on ballots/polls. 0-n is the range, with 0-1 for approval voting."]))))
 
 
 
@@ -58,14 +59,15 @@
 (defn make-option-item [{:keys [state preresult]}
                         {:keys [text title approval sum won?]}
                         i]
-  (let [can-show (or preresult (= state :complete))
+  (let [results? (or preresult (= state :complete))
         approval (int (* approval 100))
-        approval (format " %,3d%%" approval)
-        approval (if can-show approval "")
-        sum      (format " %,3d" sum)
-        sum      (if can-show sum)
-        emoji    (if won?  "✅" "  ")]
-    (str "`" (inc i) "." approval sum " " emoji " `" text title)))
+        results
+          (if results?
+            (str
+              (format " %,3d%%" approval)
+              (format " %,3d" sum) " "
+              (if won? "✅" "  ")))]
+    (str "`" (inc i) "." results " `" text title)))
 
 (defn cmd-info [text send-tx! send-md! _]
   (let [{:keys [text ballot-id exists]}
@@ -80,12 +82,11 @@
             options     (map (partial make-option-item bal-info) options (range))
             options     (str/join "\n" options)
             method-info (apply str (drop 1 (v/make-method-info bal-info)))
-            remaining   (str (v/ballot-remain-str bal-info) " remaining")
-            remaining   (case state :complete "complete" :future "future" :ongoing remaining)
+            remaining   (v/ballot-remain-str bal-info)
             info-msg    (str
                           (bal-link ballot-id title type)
                           "\n" remaining
-                          "\n" (v/ballot-time-str start hours)
+                          "\n" (v/ballot-time-str bal-info) " for " hours "h"
                           "\n" method-info "\n" desc options
                           "\n*" num-vote (v/plu " vote" num-vote) "* with " abstains " abstain.")]
         (send-md! info-msg))
@@ -120,6 +121,7 @@
         (db/set-user-contact! email contact-id)
         (send-tx! "Authenticated."))
       (send-tx! "Unable to authenticate."))))
+
 
 
 

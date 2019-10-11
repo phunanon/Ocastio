@@ -11,7 +11,7 @@ navbar {
 	position: relative;
 }
 
-navbar * {
+navbar *:not(link) {
 	display: inline-block;
 }
 
@@ -134,7 +134,7 @@ textarea.big {
 .ballot stat {
 	display: inline-block;
 	padding-right: 1rem;
-	min-width: 5rem;
+	min-width: 4rem;
 	font-variant-numeric: tabular-nums;
 }
 
@@ -144,7 +144,7 @@ textarea.big {
 }
 
 /*move into vote.css*/
-tr.won {
+td.won {
 	background-color: #afa;
 }
 

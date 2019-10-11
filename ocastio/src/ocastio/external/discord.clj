@@ -19,7 +19,7 @@
       "!auth"     engine/cmd-auth!
       "!mine"     engine/cmd-mine
       "!vote"     engine/cmd-vote!
-      #(do %))
+      #(do % %2 %3 %4))
       text send-tx! send-tx! (str "dc:" user-id))))
 
 (defn discord-start []

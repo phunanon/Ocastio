@@ -9,6 +9,9 @@
     [ring.util.anti-forgery :as util])
   (:import (java.time Instant ZoneId LocalDateTime format.DateTimeFormatter)))  ;TODO phase-out in preference of clj-time
 
+(defn state-to-key [state]
+  {(keyword (str (name state) "?")) true})
+
 (defn org-link [org-id name] [:a {:href (str "/org/" org-id)} name])
 
 (defn nav-link [name link]
@@ -32,27 +35,13 @@
 (defn format-inst [inst]
   (.format date-format (inst->LocalDateTime inst)))
 
-(defn ballot-time-str [start hours]
-  (str (f/unparse (f/formatter "yy-MM-dd HH:mm") (tc/from-sql-date start))
-       " for " hours "h"))
-
+(defn ballot-time-str [{:keys [start]}]
+  (str (f/unparse (f/formatter "yy-MM-dd HH:mm") (tc/from-sql-date start))))
 
 (defn ballot-sec-until [{:keys [start hours]}]
   (let [times (map inst-ms [(t/now) start])
         times (map #(quot % 1000) times)]
     (apply - times)))
-(defn ballot-sec-remain [{:keys [start hours]}]
-  (let [start (tc/from-sql-date start)
-        end   (t/plus start (t/hours hours))
-        times (map inst-ms [end (t/now)])
-        times (map #(quot % 1000) times)]
-    (apply - times)))
-(defn ballot-remain-str [{:keys [start hours] :as bal-info}]
-  (let [s (ballot-sec-remain bal-info)
-        m (quot s 60)
-        h (quot m 60)
-        d (quot h 60)]
-    (str d "d " (mod h 60) "h " (mod m 60) "m")))
 
 (def ^:const hour-secs (* 60 60))
 (defn ballot-state [{:keys [hours] :as info}]
@@ -63,6 +52,23 @@
       (if (> diff (* hour-secs hours))
         :complete
         :ongoing))))
+
+(defn ballot-sec-remain [{:keys [start hours]}]
+  (let [start (tc/from-sql-date start)
+        end   (t/plus start (t/hours hours))
+        times (map inst-ms [end (t/now)])
+        times (map #(quot % 1000) times)]
+    (apply - times)))
+(defn ballot-remain-str [{:keys [start hours] :as bal-info}]
+  (let [s (ballot-sec-remain bal-info)
+        m (quot s 60)
+        h (quot m 60)
+        d (quot h 60)
+        state (ballot-state bal-info)]
+    (str
+      (if (= state :future) "in ")
+      d "d " (mod h 60) "h " (mod m 60) "m"
+      ({:future "" :ongoing " left" :complete " ago"} state))))
 
 (defn make-header [{{email :email :as sess} :session uri :uri}]
   [:navbar
@@ -96,9 +102,9 @@
   (let [{name :name is-num-win :num_win is-score :is_score}
           (db/method-info method_id)
         facts [(if is-num-win
-                 (str num_win "/" num_opt " win")
-                 (str ">" majority "% win"))
-               (if is-score (str "0-" sco_range " range"))
+                 (str num_win "/" num_opt)
+                 (str ">" majority "%"))
+               (if is-score (str "0-" sco_range))
                (if preresult "early results")]
         facts (filter some? facts)
         facts (str/join ", " facts)]
@@ -108,14 +114,20 @@
                                 num_win num_opt method_id state] :as info}
                         type]
   "Accepts [ballot-info ballot-type]"
-  (def num-votes (db/ballot-num-votes ballot_id))
-  (li-link
-    [:span.ballot
-      [:bl title] [:br]
-      [:stat [:b num-votes] " " (plu "vote" num-votes)]
-      [:stat (ballot-time-str start hours)]
-      [:stat (make-method-info info)]]
-    (str "/" type "/" ballot_id)))
+  (let [num-votes (db/ballot-num-votes ballot_id)
+        {:keys [complete? ongoing? future?]}
+          (state-to-key state)]
+    (li-link
+      [:span.ballot
+        [:bl title] [:br]
+        [:stat [:b num-votes] " " (plu "vote" num-votes)]
+        [:stat
+          {:title (ballot-time-str info)}
+          [(if ongoing? :b :span)
+           ((if complete? ballot-time-str ballot-remain-str) info)]
+           (if ongoing? " of " " for ") hours "h"]
+        [:stat (make-method-info info)]]
+      (str "/" type "/" ballot_id))))
 
 (defn make-ballot-links [ballots type]
   (let [ballots (map #(assoc % :state (ballot-state %)) ballots)

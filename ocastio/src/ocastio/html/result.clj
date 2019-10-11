@@ -36,15 +36,22 @@
       (cw/lookup-or-miss law-result-cache cache-key calc-law-result)
       nil)))
 
-(defn make-result-row [{:keys [text law_id sum approval won?]}]
-  [(if won? :tr.won :tr)
-    [:td (if text text (v/make-option-text (db/law-info law_id)))]
-    [:td sum]
-    [:td (format "%.1f" (* approval 100)) "%"]])
+(defn gradient% [per]
+  {:style (str "background: linear-gradient(to right, #afa 0%, #afa "
+               per "%, white " per "%, white 100%);")})
 
-(defn render-results [results]
+(defn make-result-row [n {:keys [text law_id sum approval won?]}]
+  (let [per (* approval 100)]
+    [:tr
+      [:td (inc n)]
+      [:td (if won? "✅" "")]
+      [:td (or text (v/make-option-text (db/law-info law_id)))]
+      [:td sum]
+      [:td (gradient% per) (format "%.1f" per) "%"]]))
+
+(defn results-html [results]
   [:table
-    [:th "Option"] [:th "Sum"] [:th "Approval"]
-    (map make-result-row results)])
+    [:th "#"] [:th] [:th "Option"] [:th "Sum"] [:th "Approval"]
+    (map make-result-row (range) results)])
 
-(def ballot-results-html (comp render-results ballot-results))
+(def ballot-results-html (comp results-html ballot-results))

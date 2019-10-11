@@ -128,6 +128,7 @@
           org-name  (:name (db/org-basic-info org_id))
           options   (if poll? (db/bal-pol-options ballot-id) (db/bal-law-options ballot-id))
           num-votes (db/ballot-num-votes ballot-id)
+          remaining (v/ballot-remain-str info)
 
           user-id   (db/email->id email)
           can-vote? (if poll?
@@ -141,6 +142,8 @@
           exec?     (db/con-exec? con-id email)
           state     (v/ballot-state info)
           results?  (or (= state :complete) preresult)
+          {:keys [complete? ongoing? future?]}
+            (v/state-to-key state)
 
           Type      (if poll? "Poll" "Ballot")
           type      (str/lower-case Type)]
@@ -149,30 +152,28 @@
           [:navinfo "Conducted by "  [:a {:href (str "/org/" org_id)} org-name] "."]
           [:navinfo "Conducted for " [:a {:href (str "/con/" con-id)} con-name] "."])
         [:h2 title [:grey " | " Type]]
-        [:p (v/make-method-info info)]
-        [:p "From " [:b (v/format-inst start)] " for " [:b hours "h"] "."]
         [:quote [:pre (if (= desc "") "No description." desc)]]
-        (let [{:keys [complete? ongoing? future?]}
-                {(keyword (str (name state) "?")) true}]
-          [:div
-            (if (not complete?)
-              [:div
-                (if (or can-vote? future?) [:h3 "Options"])
-                (if (and future? can-vote?)
-                  [:div
-                    [:p.admin "You will be eligible to vote."]
-                    (make-option-info options)])
-                (if (and future? (not can-vote?))
-                  (make-option-info options))
-                (if (and ongoing? can-vote?)
-                  [:div
-                    [:p.admin "You are eligible to vote."]
-                    (make-option-form options ballot-id method_id sco_range)])])
-            (if (and (not future?) results?)
-              [:div
-                [:h3 "Results"]
-                [:p num-votes " " (v/plu "vote" num-votes) " total, " (db/num-abstain ballot-id) " abstain."]
-                (r/ballot-results-html ballot-id)])])
+        [:p (if-not complete? [:b remaining ". "])
+            "From " [:b (v/ballot-time-str info)] " for " [:b hours "h."]]
+        [:p (v/make-method-info info)]
+          (if (not complete?)
+            [:div
+              (if (or can-vote? (not results?)) [:h3 "Options"])
+              (if (and future? can-vote?)
+                [:div
+                  [:p.admin "You will be eligible to vote."]
+                  (make-option-info options)])
+              (if (and (not can-vote?) (not results?))
+                (make-option-info options))
+              (if (and ongoing? can-vote?)
+                [:div
+                  [:p.admin "You are eligible to vote."]
+                  (make-option-form options ballot-id method_id sco_range)])])
+          (if (and (not future?) results?)
+            [:div
+              [:h3 "Results"]
+              [:p num-votes " " (v/plu "vote" num-votes) " total, " (db/num-abstain ballot-id) " abstain."]
+              (r/ballot-results-html ballot-id)])
         (if (if poll? admin? exec?)
           (v/make-del-button (str "/bal/del/" ballot-id) type)))))))
 
