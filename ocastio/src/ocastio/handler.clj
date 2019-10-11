@@ -55,10 +55,11 @@
   #((assoc-in (handler %) [:headers "Cache-Control"] "max-age=604800, public")))
 
 (def app
-  (-> app-routes
-    (wrap-defaults site-defaults)
-    (wrap-gzip);))
-    (wrap-ssl-redirect))) ;Comment out when debugging locally
+  (let [use-https (.exists (clojure.java.io/file "keystore.jks"))]
+    (-> app-routes
+      (wrap-defaults site-defaults)
+      (wrap-gzip)
+      ((if use-https wrap-ssl-redirect #(do %))))))
 
 (tele/start)
 (discord/start)

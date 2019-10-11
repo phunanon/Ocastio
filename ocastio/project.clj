@@ -9,6 +9,7 @@
     [compojure "1.6.1"]
     [ring/ring-defaults "0.3.2"]
     [javax.servlet/servlet-api "2.5"]
+    [ring/ring-mock "0.3.2"]
     [hiccup "1.0.5"]
     [org.clojure/java.jdbc "0.6.0"]
     [bk/ring-gzip "0.3.0"]

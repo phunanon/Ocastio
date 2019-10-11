@@ -29,9 +29,9 @@
     [[:user_id    pk]
      date-field
      [:email      "varchar(48)"]
+     [:pub_con    "varchar(48)"]
      [:pass       "binary(32)"]
-     [:salt       "binary(32)"]
-     [:pub_con    "varchar(48)"]])
+     [:salt       "binary(32)"]])
   (jdbc/create-table-ddl :con
     [[:con_id     pk]
      date-field

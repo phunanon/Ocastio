@@ -182,7 +182,7 @@
         time-now  (f/unparse (f/formatter "HH:mm") (t/now))]
     [:form {:action (str "/" type "/new/" id) :method "POST"}
         (util/anti-forgery-field)
-        [:input {:type "text" :name "title" :placeholder (str Type " title") :maxlength 64}]
+        [:input {:type "text" :name "title" :placeholder (str Type " title") :minlength 8 :maxlength 64}]
         [:textarea {:name "desc" :placeholder "Description" :maxlength 256}]
         [:select {:name "method_id" :onchange "UpdateBallotDOM(this)"}
           (map v/make-method-option (db/vote-methods))]

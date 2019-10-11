@@ -18,7 +18,9 @@
       [:input {
         :type "text"
         :name "opt0"
-        :placeholder "Option body" 
+        :placeholder "Option body"
+        :minlength 1
+        :maxlength 128
         :onkeydown "return OptionKey(event, this)"}]]])
 
 (defn page-new [{{:keys [org-id] :as para} :params} compose]

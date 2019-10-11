@@ -17,7 +17,7 @@
 - [ ] user, org, const, law, ballot 404
 - [x] delete law
 - [x] delete ballot
-- [ ] enable edit of org name, desc
+- [x] enable edit of org name, desc
 - [ ] enable edit of const title, description
 - [ ] "your organisations"
 - [ ] "your ballots to vote on"
@@ -63,6 +63,6 @@
 - [ ] law, ballot dates
 - [ ] form errors
 - [ ] leverage defn-
-- [ ] leverage clj-time
+- [ ] leverage clojure.java-time
 - [ ] cache control
 - [ ] use cryptographic signature for votes, not referential link

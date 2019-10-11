@@ -15,4 +15,7 @@ pom.xml.asc
 *.zip
 *.db
 *.7z
+*.tkn
+*.min.css
 target/
+private/
