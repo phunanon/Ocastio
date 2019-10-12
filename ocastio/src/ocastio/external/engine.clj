@@ -82,7 +82,7 @@
             options     (map (partial make-option-item bal-info) options (range))
             options     (str/join "\n" options)
             method-info (apply str (drop 1 (v/make-method-info bal-info)))
-            remaining   (v/ballot-remain-str bal-info)
+            remaining   (v/ballot-time-status bal-info)
             info-msg    (str
                           (bal-link ballot-id title type)
                           "\n" remaining

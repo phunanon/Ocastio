@@ -128,7 +128,7 @@
           org-name  (:name (db/org-basic-info org_id))
           options   (if poll? (db/bal-pol-options ballot-id) (db/bal-law-options ballot-id))
           num-votes (db/ballot-num-votes ballot-id)
-          remaining (v/ballot-remain-str info)
+          remaining (v/ballot-time-status info)
 
           user-id   (db/email->id email)
           can-vote? (if poll?
@@ -154,7 +154,7 @@
         [:h2 title [:grey " | " Type]]
         [:quote [:pre (if (= desc "") "No description." desc)]]
         [:p (if-not complete? [:b remaining ". "])
-            "From " [:b (v/ballot-time-str info)] " for " [:b hours "h."]]
+            "From " [:b (v/ballot-time-str info)] " for " [:b hours "h"] "."]
         [:p (v/make-method-info info)]
           (if (not complete?)
             [:div

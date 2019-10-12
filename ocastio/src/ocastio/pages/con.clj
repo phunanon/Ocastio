@@ -16,7 +16,7 @@
       [:bl title]
       [:br]
       [:stat "📜 " num-law] [:stat "📊 " num-bal]
-      [:span desc]]
+      [:span.dark desc]]
     (str "/con/" con_id)))
 
 (defn supplement-con-info [{:keys [con_id] :as con-info}]

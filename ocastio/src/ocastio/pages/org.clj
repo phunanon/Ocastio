@@ -13,7 +13,7 @@
     [:span.org
       [:img.small {:src img}]
       [:bl name] [:br]
-      [:stat "👤 " num-mem] [:stat "📜 " num-con] [:stat "📊 " num-pol]
+      [:stat "👤 " num-mem] [:stat "📊 " num-pol] [:stat "📜 " num-con]
       [:br] (if desc [:span.dark desc])]
     (str "/org/" org_id)))
 

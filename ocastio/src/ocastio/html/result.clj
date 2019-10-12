@@ -14,7 +14,7 @@
         {is-num-win :num_win is-score :is_score}
           (db/method-info method_id)
         majority    (/ majority 100)
-        sco_range   (if is-score (float (dec sco_range)) 1.0)
+        sco_range   (if is-score (float sco_range) 1.0)
         results     (db/vot-per-app ballot-id sco_range)
         won?        #(if is-num-win (< %2 num_win) (> (:approval %) majority))
         assoc-won   #(assoc % :won? (won? % %2))

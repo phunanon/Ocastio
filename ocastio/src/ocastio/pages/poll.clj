@@ -19,6 +19,7 @@
         :type "text"
         :name "opt0"
         :placeholder "Option body"
+        :required true
         :minlength 1
         :maxlength 128
         :onkeydown "return OptionKey(event, this)"}]]])

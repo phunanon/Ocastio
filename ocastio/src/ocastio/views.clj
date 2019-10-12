@@ -38,7 +38,7 @@
 (defn ballot-time-str [{:keys [start]}]
   (str (f/unparse (f/formatter "yy-MM-dd HH:mm") (tc/from-sql-date start))))
 
-(defn ballot-sec-until [{:keys [start hours]}]
+(defn ballot-sec-now [{:keys [start]}]
   (let [times (map inst-ms [(t/now) start])
         times (map #(quot % 1000) times)]
     (apply - times)))
@@ -46,7 +46,7 @@
 (def ^:const hour-secs (* 60 60))
 (defn ballot-state [{:keys [hours] :as info}]
   "Returns :future :ongoing or :complete"
-  (let [diff (ballot-sec-until info)]
+  (let [diff (ballot-sec-now info)]
     (if (neg? diff)
       :future
       (if (> diff (* hour-secs hours))
@@ -59,15 +59,19 @@
         times (map inst-ms [end (t/now)])
         times (map #(quot % 1000) times)]
     (apply - times)))
-(defn ballot-remain-str [{:keys [start hours] :as bal-info}]
-  (let [s (ballot-sec-remain bal-info)
-        m (quot s 60)
-        h (quot m 60)
-        d (quot h 60)
-        state (ballot-state bal-info)]
+(defn ballot-time-status [{:keys [start hours] :as bal-info}]
+  (let [state (ballot-state bal-info)
+        {:keys [complete? ongoing? future?]}
+          (state-to-key state)
+        s     ((if ongoing? ballot-sec-remain ballot-sec-now) bal-info)
+        s     (Math/abs s)
+        m     (/ s 60)
+        h     (/ m 60)
+        d     (quot h 24)]
     (str
-      (if (= state :future) "in ")
-      d "d " (mod h 60) "h " (mod m 60) "m"
+      (if future? "in ")
+      d "d " (Math/round (float (mod h 24))) "h "
+      (Math/round (float (mod m 60))) "m"
       ({:future "" :ongoing " left" :complete " ago"} state))))
 
 (defn make-header [{{email :email :as sess} :session uri :uri}]
@@ -124,7 +128,7 @@
         [:stat
           {:title (ballot-time-str info)}
           [(if ongoing? :b :span)
-           ((if complete? ballot-time-str ballot-remain-str) info)]
+           ((if complete? ballot-time-str ballot-time-status) info)]
            (if ongoing? " of " " for ") hours "h"]
         [:stat (make-method-info info)]]
       (str "/" type "/" ballot_id))))
