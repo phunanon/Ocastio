@@ -164,3 +164,10 @@
 (defn valid-email? [email]
   (def pattern #"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
   (and (string? email) (re-matches pattern email)))
+
+(defn hexify "Convert byte sequence to hex string" [coll]
+  (let [hex [\0 \1 \2 \3 \4 \5 \6 \7 \8 \9 \a \b \c \d \e \f]]
+      (letfn [(hexify-byte [b]
+        (let [v (bit-and b 0xFF)]
+          [(hex (bit-shift-right v 4)) (hex (bit-and v 0x0F))]))]
+        (apply str (mapcat hexify-byte coll)))))

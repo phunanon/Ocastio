@@ -46,8 +46,8 @@
   (GET  "/ballot/new/:con-id"         req (rou/page req :bal-new))
   (POST "/ballot/new/:con-id"         req (rou/post req :bal-new))
   (GET  "/ballot/:ballot_id"          req (rou/page req :ballot))
-  (GET  "/debug"                      req (resp/content-type (resp/response (str req)) "text/html"))
-  (POST "/debug"                      req (resp/content-type (resp/response (str req)) "text/html"))
+  (GET  "/admin"                      req (rou/page req :admin))
+  (POST "/admin"                      req (rou/post req :admin))
   (route/resources "/")
   (route/not-found "Not found. Go back."))
 

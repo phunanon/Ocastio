@@ -8,6 +8,7 @@
     [ocastio.pages.vote    :as vot]
     [ocastio.pages.con     :as con]
     [ocastio.pages.law     :as law]
+    [ocastio.pages.admin   :as adm]
     [ocastio.db :as db]
     [ocastio.views :as v]
     [ring.util.response :as resp]))
@@ -25,6 +26,7 @@
 (defn law-exec? [{:keys [law-id]} {:keys [email]}]
   (let [{:keys [con_id]} (db/law-basic-info law-id)]
     (db/con-exec? con_id email)))
+(defn admin? [_ {:keys [email]}] (= email "phunanon@gmail.com"))
 
 (def pages {
             ;maker          auth func
@@ -44,7 +46,8 @@
   :law-imp  [law/page-imp   con-exec?]
   :ballots  [bal/page-all   no-auth]
   :bal-new  [bal/page-new   con-exec?]
-  :ballot   [bal/page       no-auth]})
+  :ballot   [bal/page       no-auth]
+  :admin    [adm/page       admin?]})
 
 (defn page [{:keys [params session uri] :as request} where]
   (if (contains? pages where)
@@ -75,7 +78,8 @@
   :law-del  [law/del!       law-exec?]
   :bal-new  [vot/new-bal!   con-exec?]
   :bal-del  [vot/del!       signed?]
-  :vote     [vot/vote!      signed?]})
+  :vote     [vot/vote!      signed?]
+  :admin    [adm/post       admin?]})
 
 ;TODO: make :sess optional for doer's
 (defn do-action [{:keys [params session referer] :as request} what]

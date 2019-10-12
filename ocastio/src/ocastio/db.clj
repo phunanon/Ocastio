@@ -36,20 +36,31 @@
 (defn hashpass [plain salt]
   (sha256-bytes (byte-array (concat (.getBytes plain "UTF-8") salt))))
 
+(defn pass-details [email]
+  (first (jdbc/query db-spec ["select pass, salt from user where email = ?" email])))
+
 (defn correct-pass? [email password]
-  (let [record (jdbc/query db-spec ["select pass, salt from user where email = ?" email])
-        record (first record)
-        salt   (:salt record)
-        pass   (:pass record)
+  (let [{:keys [pass salt]}
+          (pass-details email)
         rehash (hashpass password salt)]
     (= (seq rehash) (seq pass))))
 
+(defn new-pass&salt [password]
+  (let [salt (sha256-bytes (str (.getTime (java.util.Date.))))
+        pass (hashpass password salt)]
+    {:pass pass :salt salt}))
+
 (defn new-user! [email password]
-  (let [salt    (sha256-bytes (str (.getTime (java.util.Date.))))
-        pass    (hashpass password salt)
+  (let [{:keys [pass salt]}
+          (new-pass&salt password)
         user-id (jdbc/insert! db-spec :user {:email email :pass pass :salt salt})
         user-id (fvf user-id)]
-    (jdbc/insert! db-spec :org2user {:org_id 1 :user_id user-id})))
+    (jdbc/insert! db-spec :org2user {:org_id 3 :user_id user-id})))
+
+(defn change-pass [email password]
+  (let [{:keys [pass salt]}
+          (new-pass&salt password)]
+    (jdbc/update! db-spec :user {:pass pass :salt salt} ["email = ?" email])))
 
 (defn set-user-contact! [email contact]
   (jdbc/update! db-spec :user {:contact contact} ["email = ?" email]))
