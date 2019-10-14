@@ -52,6 +52,7 @@ body {
 
 navinfo {
 	display: inline-block;
+	float: right;
 	margin: 0 1rem;
 	padding: .5rem;
 	background-color: #dfd;
@@ -92,7 +93,7 @@ balopt {
 	margin-bottom: .25rem;
 }
 balopt span {
-	vertical-align: top;
+	vertical-align: bottom;
 	line-height: 2.25rem;
 }
 [type="checkbox"], [type="radio"] {

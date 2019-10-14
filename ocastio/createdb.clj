@@ -98,16 +98,16 @@
 ;(jdbc/with-db-connection [conn {:dbtype "h2" :dbname "./ocastio"}]
 ;  (jdbc/db-do-commands conn (jdbc/drop-table-ddl :constitution)))
 
-(jdbc/insert! db-spec :method {:name "Majority Approvals" :desc "individual options approved by majority" :num_win false})
-(jdbc/insert! db-spec :method {:name "Score Approvals" :desc "individual options approved by score" :num_win false})
-(jdbc/insert! db-spec :method {:name "Most Approvals" :desc "N options approved by majority" :num_win true})
-(jdbc/insert! db-spec :method {:name "Highest Approvals" :desc "N options approved by score" :num_win true})
-(jdbc/insert! db-spec :method {:name "Single-Transferable" :desc "N options approved by transferred totals" :num_win true})
-(jdbc/insert! db-spec :method {:name "Mass Majority Approval" :desc "all options approved by majority" :num_win false})
-(jdbc/insert! db-spec :method {:name "Mass Score Approval" :desc "all options approved by score" :num_win false})
+(jdbc/insert! db-spec :method {:name "Majority Approvals" :desc "individual options approved by majority" :num_win false :is_score false})
+(jdbc/insert! db-spec :method {:name "Score Approvals" :desc "individual options approved by score" :num_win false :is_score true})
+(jdbc/insert! db-spec :method {:name "Most Approvals" :desc "N options approved by majority" :num_win true :is_score false})
+(jdbc/insert! db-spec :method {:name "Highest Approvals" :desc "N options approved by score" :num_win true :is_score true})
+(jdbc/insert! db-spec :method {:name "Single-Transferable" :desc "N options approved by transferred totals" :num_win true :is_score false})
+(jdbc/insert! db-spec :method {:name "Mass Majority Approval" :desc "all options approved by majority" :num_win false :is_score false})
+(jdbc/insert! db-spec :method {:name "Mass Score Approval" :desc "all options approved by score" :num_win false :is_score true})
 
 ;ALTER TABLE ballot
-;ADD name varchar(255);
+;ADD name varchar(255) NOT NULL DEFAULT("");
 ;ALTER TABLE ballot RENAME COLUMN range TO sco_range;
 
 ;SELECT DISTINCT constraint_name FROM information_schema.constraints 

@@ -272,7 +272,8 @@ WHERE law.law_id = ?" law-id])))
 
 (defn ballot-infos [org-id]
   (jdbc/query db-spec ["
-SELECT ballot.ballot_id, title, ballot.desc, method.method_id, ballot.num_win, start, hours, COUNT(opt_id) num_opt, majority, sco_range, preresult
+SELECT ballot.ballot_id, title, ballot.desc, method.method_id,
+ballot.num_win, start, hours, COUNT(opt_id) num_opt, majority, sco_range, preresult
 FROM ballot
 JOIN bal_opt ON bal_opt.ballot_id = ballot.ballot_id
 JOIN method ON method.method_id = ballot.method_id
@@ -282,7 +283,9 @@ ORDER BY count(opt_id) DESC" org-id]))
 
 (defn ballot-info [ballot-id]
   (first (jdbc/query db-spec ["
-SELECT ballot.ballot_id, org_id, title, ballot.desc, method.method_id, ballot.num_win, start, hours, preresult, majority, sco_range, COUNT(opt_id) num_opt
+SELECT ballot.ballot_id, org_id, title, ballot.desc, method.method_id,
+ballot.num_win, start, hours, preresult, majority, sco_range,
+COUNT(opt_id) num_opt
 FROM ballot
 JOIN method ON method.method_id = ballot.method_id
 JOIN bal_opt ON bal_opt.ballot_id = ballot.ballot_id
