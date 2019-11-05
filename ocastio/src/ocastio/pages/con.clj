@@ -80,13 +80,14 @@
   (let [active?      (and parent-active? won?)
         approval     (if approval (* approval 100) 0)]
   [:leaf
-    [:a {:href (str "/law/" law_id)}
-      [:leaftitle {:class (if active? "in" "out")} title]]
+    {:class (if active? "in" "out")}
     (if bal-id
       [:a.leafapp
         {:class (if won? "in" "out")
          :href  (str "/ballot/" bal-id)}
         (format "%.2f%%" approval)])
+    [:a {:href (str "/law/" law_id)}
+      [:leaftitle {:class (if active? "in" "out")} title]]
     [(if (= body "") :leafdesc.none :leafdesc) [:pre body]]
     (map #(render-leaf % by-parent active?)
           (by-parent law_id))]))
@@ -156,7 +157,10 @@
         [:p.admin [:a {:href (str "/law/new/" con-id "/0")} "Compose a new law"]])
       (if is-exec
         [:p.admin [:a {:href (str "/law/imp/" con-id)} "Import new law"]])
-      [:p num-act " active, " num-ina " inactive."]
+      [:p num-act " active, " num-ina " inactive. "
+        [:button
+          {:onclick "Array.from(es('leaf.out')).forEach(l => l.style.display = l.style.display == '' ? 'none' : '')"}
+          "Toggle inactive"]]
       (render-laws all-laws)
     [:br]
     (if is-exec

@@ -37,7 +37,8 @@
 
 (defn sign! [{{:keys [email password ref token
                       signin register reset] :as params} :params}]
-  (let [exists    (db/email-exists? email)
+  (let [email     (str/lower-case email)
+        exists    (db/email-exists? email)
         return    #(hash-map :redir % :sess %2)
         succeed   #(return (if ref ref "/") {:email email})
         err-retry #(return (str "/signin?ref=" ref) {:sign-err %})]

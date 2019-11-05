@@ -62,3 +62,22 @@ leaf leaftitle.out:before {
 		width: calc(100%);
 	}
 }
+
+@media print
+{
+	body * {
+		display: none;
+	}
+	leaf {
+		background-color: white;
+		border: none;
+		border-left: .1rem solid black;
+		width: unset;
+	}
+	navbar, leaf.out, .leafapp, leaftitle:before {
+		display: none !important;
+	}
+	h2, tree, leaf, leafdesc, leafdesc pre, leaf a, leaftitle {
+		display: block;
+	}
+}

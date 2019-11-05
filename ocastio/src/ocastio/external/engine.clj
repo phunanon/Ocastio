@@ -98,6 +98,7 @@
 (defn cmd-register! [text send-tx! send-md! contact-id]
   (let [[_ email pass]
           (str/split text #" ")
+        email     (str/lower-case email)
         e-exists  (db/email-exists? email)
         a-exists  (db/contact->id contact-id)
         e-invalid (not (v/valid-email? email))
@@ -115,7 +116,9 @@
 
 
 (defn cmd-auth! [text send-tx! send-md! contact-id]
-  (let [[_ email pass] (str/split text #" ")]
+  (let [[_ email pass]
+          (str/split text #" ")
+        email (str/lower-case email)]
     (if (db/correct-pass? email pass)
       (do
         (db/set-user-contact! email contact-id)
