@@ -1,5 +1,5 @@
-const e = (el) => document.querySelector(el);
 const es = (el) => document.querySelectorAll(el);
+const e = (el) => es(el)[0];
 const isPoll = document.title.includes("oll");
 const plural = (word, n) => n == 1 ? word : word +"s";
 
@@ -8,10 +8,12 @@ function UpdateBallotDOM ()
   const sel = e("select");
   const option = sel.options[sel.selectedIndex];
   const hasNumWin = option.hasAttribute("data-num-win");
+  const isScore = option.hasAttribute("data-is-score");
+  const isMass = option.hasAttribute("data-is-mass");
   e("p#num_win").style.display  = hasNumWin ? "flex" : "none";
   e("p#majority").style.display = hasNumWin ? "none" : "flex";
-  const isScore = option.hasAttribute("data-is-score");
   e("p#range").style.display = isScore ? "flex" : "none";
+  e("p#limit").style.display = isMass || isScore ? "none" : "flex";
   let maxNumOpt;
   if (isPoll) maxNumOpt = e("div#options").children.length - 1;
   else        maxNumOpt = e("table#laws").rows.length;
@@ -26,6 +28,10 @@ function UpdateValue (el, word, that)
 }
 setInterval("UpdateValue('#days', 'day', '#day'); UpdateValue('#hours', 'hour', '#hour')", 100);
 
+function OptionsChanged () {
+  e("#limit_num").value = e("#limit_num").max =
+    es(isPoll ? "#options input" : "input[type=checkbox]:checked").length;
+}
 
 //Poll related
 function OptionKey (e, that)
@@ -61,14 +67,16 @@ function AddOption (el)
   clone.name = "opt" + (parseInt(clone.name.substr(3)) + 1);
   parent.insertBefore(clone, el.nextSibling);
   clone.focus();
+  OptionsChanged();
 }
 function RemoveOption (el)
 {
   if (el.nextSibling === null)
-      el.previousSibling.focus();
-    else
-      el.nextSibling.focus();
-    el.parentNode.removeChild(el)
+    el.previousSibling.focus();
+  else
+    el.nextSibling.focus();
+  el.parentNode.removeChild(el);
+  OptionsChanged();
 }
 function AddOptionLast () {
   const lastOpt = Array.from(es("#options input")).pop();

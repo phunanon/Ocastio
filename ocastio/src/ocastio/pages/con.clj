@@ -40,8 +40,11 @@
       [:p "Enter the details of the new constitution for " [:a {:href (str "/org/" org-id)} name] "."]
       [:form {:action uri :method "POST"}
         (util/anti-forgery-field)
-        [:input    {:type "text"    :name "title" :placeholder "Constitution title"}]
-        [:textarea {                :name "desc"  :placeholder "Description"}]
+        [:input    {:type "text"
+                    :name "title"
+                    :placeholder "Constitution title"
+                    :required true}]
+        [:textarea {:name "desc"  :placeholder "Description"}]
         [:input    {:type "submit"  :value "Create"}]])))
 
 ; TODO check const doesn't already exist, redirect to view const, check title/desc not nil

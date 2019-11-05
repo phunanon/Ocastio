@@ -60,7 +60,7 @@
      [:hours      "smallint"]
      [:preresult  "boolean"] ;show early results
      [:majority   "tinyint"] ;winning majority percentage
-     [:sco_range  "tinyint"] ;score range, 0-range
+     [:sco_range  "tinyint"] ;score range, 0-range, or limit on number of options
      org-fk user-fk method-fk])
   (jdbc/create-table-ddl :bal_opt
     [[:opt_id pk]

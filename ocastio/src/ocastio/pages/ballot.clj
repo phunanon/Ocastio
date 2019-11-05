@@ -18,7 +18,7 @@
         id      (str "law" law-id)]
     [:tr
       [:td
-        [:input {:type "checkbox" :name id :id id}]
+        [:input {:type "checkbox" :name id :id id :onchange "OptionsChanged()"}]
         [:label {:for id}]]
       [:td title]]))
 

@@ -109,6 +109,7 @@
                  (str num_win "/" num_opt)
                  (str ">" majority "%"))
                (if is-score (str "0-" sco_range))
+               (if (#{1 3} method_id) (str "pick " sco_range))
                (if preresult "early results")]
         facts (filter some? facts)
         facts (str/join ", " facts)]
@@ -153,7 +154,10 @@
 
 (defn make-method-option [{:keys [method_id name desc num_win is_score]}]
   [:option
-    {:value method_id :data-num-win num_win :data-is-score is_score}
+    {:value method_id
+     :data-num-win num_win
+     :data-is-score is_score
+     :data-is-mass (#{6 7} method_id)} ;TODO pull from database
     (str name " - " desc)])
 
 (defn make-option-text [{:keys [text law_id title]}]
