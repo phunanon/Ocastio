@@ -354,6 +354,14 @@ JOIN org2user ON ballot.org_id = org2user.org_id
 WHERE ballot.org_id = ? AND org2user.user_id = ?
 LIMIT 1" org-id user-id]))))
 
+(defn last-vote [ballot-id user-id]
+  (if (and ballot-id user-id)
+    (fvf (jdbc/query db-spec ["
+SELECT vote.date FROM vote
+JOIN bal_opt ON bal_opt.opt_id = vote.opt_id
+WHERE user_id = ? AND bal_opt.ballot_id = ?
+ORDER BY vote.date LIMIT 1" user-id ballot-id]))))
+
 (defn user-polls [user-id]
   (jdbc/query db-spec ["
 SELECT * FROM ballot 

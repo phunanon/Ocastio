@@ -162,6 +162,7 @@ function ValidateChoice() {
           can-vote? (if poll?
             (db/can-poll-vote? org_id user-id)
             (db/can-ballot-vote? ballot-id user-id))
+          last-vote (db/last-vote ballot-id user-id)
 
           con-id    (db/bal->con ballot-id)
           con-name  (:title (db/con-info con-id))
@@ -184,6 +185,12 @@ function ValidateChoice() {
         [:p (if-not complete? [:b remaining ". "])
             "From " [:b (v/ballot-time-str info)] " for " [:b hours "h"] ". "
             (v/make-method-info info) "."]
+        (if (and ongoing? can-vote? (not complete?))
+          (if last-vote 
+            [:p.admin "You can update your previous vote (" (v/ballot-time-str last-vote) ")."] 
+            [:p.admin "You are eligible to vote."])
+          (if last-vote 
+            [:p.admin "Your final vote was at " (v/ballot-time-str last-vote) "."]))
         (if (not complete?)
           [:div
             (if (or can-vote? (not results?)) [:h3 "Options"])
@@ -195,7 +202,6 @@ function ValidateChoice() {
               (make-option-info options))
             (if (and ongoing? can-vote?)
               [:div
-                [:p.admin "You are eligible to vote."]
                 (make-option-form options ballot-id method_id sco_range)])])
         (if (and (not future?) results?)
           [:div
