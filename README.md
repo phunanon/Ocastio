@@ -1,6 +1,7 @@
 # Ocastio
 An experimental website for online organisational democracy.  
-A website running a similar copy to this repository is currently hosted at [ocastio.uk](https://ocastio.uk)
+~A website running a similar copy to this repository is currently hosted at [ocastio.uk](https://ocastio.uk)~  
+Shut-down on the 25th of April, 2021.
 
 ## Prerequisites
 
